@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión Binapps</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f8f9fb;
+    --surface: #ffffff;
+    --border: #e4e7ed;
+    --border-light: #f0f2f5;
+    --text: #1a1d23;
+    --text-muted: #6b7280;
+    --text-soft: #9ca3af;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --blue-border: #bfdbfe;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --green-border: #bbf7d0;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --red-border: #fecaca;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --amber-border: #fde68a;
+    --purple: #7c3aed;
+    --purple-light: #f5f3ff;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* LAYOUT */
+  .app { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    padding: 8px 10px 20px;
+    letter-spacing: -.3px;
+  }
+  .logo span { color: var(--blue); }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13.5px;
+    font-family: inherit;
+    transition: all .15s;
+    text-align: left;
+    width: 100%;
+  }
+  .nav-btn:hover { background: var(--bg); color: var(--text); }
+  .nav-btn.active { background: var(--blue-light); color: var(--blue); font-weight: 500; }
+  .nav-btn svg { width: 16px; height: 16px; flex-shrink: 0; stroke-width: 1.8; }
+
+  .nav-section {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    padding: 16px 10px 6px;
+  }
+
+  .main { flex: 1; padding: 28px 32px; overflow-y: auto; min-width: 0; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* HEADER */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-title { font-size: 20px; font-weight: 600; letter-spacing: -.4px; }
+  .page-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  /* CARDS */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 28px; }
+
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+  .kpi-num { font-size: 28px; font-weight: 600; letter-spacing: -1px; line-height: 1; margin-bottom: 5px; }
+  .kpi-lbl { font-size: 12px; color: var(--text-muted); }
+  .kpi.blue .kpi-num { color: var(--blue); }
+  .kpi.green .kpi-num { color: var(--green); }
+  .kpi.red .kpi-num { color: var(--red); }
+  .kpi.amber .kpi-num { color: var(--amber); }
+
+  /* SECTION TITLES */
+  .sec-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  /* PROGRESS */
+  .progress-list { display: flex; flex-direction: column; gap: 10px; }
+  .prog-item { }
+  .prog-header { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-muted); margin-bottom: 5px; }
+  .prog-bar { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--blue); border-radius: 99px; transition: width .4s ease; }
+  .prog-fill.full { background: var(--green); }
+
+  /* ACTIVITIES */
+  .act-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .act-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: var(--shadow);
+    transition: border-color .15s;
+  }
+  .act-item:hover { border-color: var(--blue-border); }
+
+  .act-check {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+    transition: all .15s;
+    background: var(--surface);
+  }
+  .act-check:hover { border-color: var(--blue); }
+  .act-check.done { background: var(--green); border-color: var(--green); }
+  .act-check.done::after { content: ''; width: 5px; height: 9px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); display: block; }
+
+  .act-body { flex: 1; min-width: 0; }
+  .act-desc { font-size: 13.5px; line-height: 1.45; }
+  .act-desc.done { text-decoration: line-through; color: var(--text-soft); }
+  .act-meta { font-size: 11.5px; color: var(--text-soft); margin-top: 4px; }
+  .act-result { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
+  .act-result::before { content: '→ '; }
+
+  .act-actions { display: flex; gap: 4px; align-items: flex-start; }
+  .icon-btn {
+    padding: 4px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-soft);
+    border-radius: 4px;
+    transition: all .15s;
+    display: flex;
+    align-items: center;
+  }
+  .icon-btn:hover { background: var(--red-light); color: var(--red); }
+  .icon-btn svg { width: 14px; height: 14px; stroke-width: 1.8; }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-top: 5px;
+  }
+  .badge-alta { background: var(--red-light); color: var(--red); }
+  .badge-media { background: var(--amber-light); color: var(--amber); }
+  .badge-lista { background: var(--green-light); color: var(--green); }
+  .badge-normal { background: var(--bg); color: var(--text-muted); }
+  .badge-proceso { background: var(--purple-light); color: var(--purple); }
+  .badge-area {
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    font-weight: 500;
+    margin-right: 4px;
+  }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-chip {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    font-size: 12px;
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--text-muted);
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .filter-chip:hover { border-color: var(--blue-border); color: var(--blue); }
+  .filter-chip.active { background: var(--blue); color: white; border-color: var(--blue); }
+
+  /* FORM */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .form-title { font-size: 15px; font-weight: 600; margin-bottom: 18px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-grid.full { grid-template-columns: 1fr; }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 13.5px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--blue); background: white; }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  .btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: var(--blue); color: white; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-secondary { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border-light); }
+  .btn svg { width: 15px; height: 15px; stroke-width: 2; }
+
+  /* INFORME */
+  .report-out {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 12.5px;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    max-height: 480px;
+    overflow-y: auto;
+    color: var(--text);
+    margin-top: 14px;
+  }
+
+  /* GRID LAYOUT */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  /* EMPTY */
+  .empty { color: var(--text-soft); font-size: 13px; padding: 24px; text-align: center; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--text);
+    color: white;
+    padding: 12px 18px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all .2s;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .area-edit-btn {
+    opacity: 0;
+    position: absolute;
+    top: 10px; right: 10px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 3px 6px;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--text-muted);
+    transition: all .15s;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .area-card:hover .area-edit-btn { opacity: 1; }
+  .area-card:hover .area-edit-btn:hover { background: var(--blue-light); color: var(--blue); border-color: var(--blue-border); }
+  .area-name-input {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border: 1.5px solid var(--blue);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: inherit;
+    outline: none;
+    width: 100%;
+    background: white;
+  }
+
+  .area-group { margin-bottom: 22px; }
+  .area-group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .area-group-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .area-group-count {
+    font-size: 11px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 1px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+  }
+  .area-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    align-items: center;
+  }
+  .search-bar input {
+    flex: 1;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 13.5px;
+    background: var(--surface);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .search-bar input:focus { border-color: var(--blue); }
+  .search-count { font-size: 12px; color: var(--text-soft); white-space: nowrap; }
+
+  /* EDIT MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.35);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 24px 26px;
+    width: min(560px, 95vw);
+    box-shadow: var(--shadow-md);
+    transform: translateY(12px);
+    transition: transform .2s;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .modal-title { font-size: 15px; font-weight: 600; }
+  .modal-close { background: none; border: none; cursor: pointer; color: var(--text-soft); font-size: 20px; line-height: 1; padding: 2px 6px; border-radius: 4px; }
+  .modal-close:hover { background: var(--bg); color: var(--text); }
+
+  @media (max-width: 700px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .two-col { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo" style="display:flex;align-items:center;gap:10px;padding-bottom:20px">
+  <img src="https://binapps.com/wp-content/uploads/2021/10/cropped-favicon_01-270x270.png" 
+       alt="Binapps" 
+       style="width:36px;height:36px;border-radius:8px;object-fit:contain"
+       onerror="this.style.display='none';document.getElementById('logo-text').style.display='block'">
+  <span id="logo-text" style="display:none;font-size:15px;font-weight:600;color:var(--text)">Binapps <span style="color:var(--blue)">·</span> Gestión</span>
+  <div>
+    <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.2">Binapps</div>
+    <div style="font-size:11px;color:var(--text-soft)">Panel de gestión</div>
+  </div>
+</div>
+
+    <button class="nav-btn active" onclick="goTo('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Resumen
+    </button>
+    <button class="nav-btn" onclick="goTo('actividades')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Actividades
+    </button>
+    <button class="nav-btn" onclick="goTo('pendientes')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Pendientes
+    </button>
+
+    <div class="nav-section">Acciones</div>
+
+    <button class="nav-btn" onclick="goTo('agregar')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Agregar actividad
+    </button>
+    <button class="nav-btn" onclick="goTo('informe')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Generar informe
+    </button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Panel de gestión</div>
+          <div class="page-sub" id="dash-fecha"></div>
+        </div>
+      </div>
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="two-col">
+        <div class="card">
+          <div class="sec-title">Progreso por área</div>
+          <div class="progress-list" id="progress-list"></div>
+        </div>
+        <div class="card">
+          <div class="sec-title">Últimas actividades</div>
+          <div class="act-list" id="recent-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVIDADES -->
+    <div class="page" id="page-actividades">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Todas las actividades</div>
+          <div class="page-sub" id="acts-count"></div>
+        </div>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Buscar actividad..." oninput="renderActs()">
+        <span class="search-count" id="search-count"></span>
+      </div>
+      <div class="filters" id="area-filters"></div>
+      <div class="act-list" id="all-acts"></div>
+    </div>
+
+    <!-- PENDIENTES -->
+    <div class="page" id="page-pendientes">
+
+      <!-- VISTA RESUMEN: tarjetas por área -->
+      <div id="pend-overview">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Pendientes por área</div>
+            <div class="page-sub" id="pend-total-sub"></div>
+          </div>
+        </div>
+        <div id="pend-area-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px"></div>
+      </div>
+
+      <!-- VISTA DETALLE: pendientes de un área -->
+      <div id="pend-detail" style="display:none">
+        <div class="page-header">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button onclick="backToOverview()" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 12px;cursor:pointer;font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:6px;font-family:inherit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:14px;height:14px;stroke-width:2"><polyline points="15 18 9 12 15 6"/></svg>
+              Volver
+            </button>
+            <div>
+              <div class="page-title" id="pend-detail-title"></div>
+              <div class="page-sub" id="pend-detail-sub"></div>
+            </div>
+          </div>
+        </div>
+        <div class="act-list" id="pend-detail-list"></div>
+      </div>
+
+    </div>
+
+    <!-- AGREGAR -->
+    <div class="page" id="page-agregar">
+      <div class="page-header">
+        <div class="page-title">Agregar actividad</div>
+      </div>
+      <div class="form-card">
+        <div class="form-title">Nueva actividad</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Área</label>
+            <select id="f-area">
+              <option>Área de soporte / Zoho</option>
+              <option>Plan de cuentas / Contabilidad</option>
+              <option>Modelo Excel / Análisis</option>
+              <option>Power BI</option>
+              <option>Azure</option>
+              <option>Hetzner</option>
+              <option>TD Synnex</option>
+              <option>Comercial</option>
+              <option>General</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" id="f-fecha">
+          </div>
+        </div>
+        <div class="form-grid full">
+          <div class="form-group">
+            <label>Descripción de la actividad</label>
+            <textarea id="f-desc" placeholder="¿Qué se hizo? ¿Cuál fue el contexto?"></textarea>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Resultado / métrica</label>
+            <input type="text" id="f-res" placeholder="ej. configurado, aprobado, corregido...">
+          </div>
+          <div class="form-group">
+            <label>Estado</label>
+            <select id="f-est">
+              <option>Pendiente</option>
+              <option>En proceso</option>
+              <option>Completado</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Prioridad (si es pendiente)</label>
+            <select id="f-pri">
+              <option>Alta</option>
+              <option>Media</option>
+              <option value="Lista">Lista para ejecutar</option>
+              <option>Normal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Herramienta / responsable</label>
+            <input type="text" id="f-her" placeholder="ej. Zoho Desk, Edwin, BNET ERP...">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:6px">
+          <button class="btn btn-primary" onclick="addAct()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Guardar actividad
+          </button>
+          <button class="btn btn-secondary" onclick="clearForm()">Limpiar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFORME -->
+    <div class="page" id="page-informe">
+      <div class="page-header">
+        <div class="page-title">Generar informe</div>
+      </div>
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Período</label>
+            <input type="text" id="inf-per" value="Enero – Mayo 2026">
+          </div>
+          <div class="form-group">
+            <label>Preparado por</label>
+            <input type="text" id="inf-aut" value="Área Financiera — Binapps S.A.S">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Filtrar por área</label>
+            <select id="inf-area">
+              <option value="">Todas las áreas</option>
+              <option>Área de soporte / Zoho</option>
+              <option>Plan de cuentas / Contabilidad</option>
+              <option>Modelo Excel / Análisis</option>
+              <option>Power BI</option>
+              <option>Azure</option>
+              <option>Hetzner</option>
+              <option>TD Synnex</option>
+              <option>Comercial</option>
+            </select>
+          </div>
+          <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end;gap:8px;padding-top:4px">
+            <label style="display:flex;align-items:center;gap:8px;font-weight:400;color:var(--text)">
+              <input type="checkbox" id="inc-c" checked> Incluir completadas
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-weight:400;color:var(--text)">
+              <input type="checkbox" id="inc-p" checked> Incluir pendientes
+            </label>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="genReport()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Generar
+          </button>
+          <button class="btn btn-secondary" id="copy-btn" onclick="copyReport()">Copiar texto</button>
+        </div>
+        <div class="report-out" id="report-out" style="display:none"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Editar actividad</div>
+      <button class="modal-close" onclick="closeModalDirect()">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Área</label>
+        <select id="e-area">
+          <option>Área de soporte / Zoho</option>
+          <option>Plan de cuentas / Contabilidad</option>
+          <option>Modelo Excel / Análisis</option>
+          <option>Power BI</option>
+          <option>Azure</option>
+          <option>Hetzner</option>
+          <option>TD Synnex</option>
+          <option>Comercial</option>
+          <option>Valoración Empresa</option>
+          <option>General</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="e-fecha">
+      </div>
+    </div>
+    <div class="form-grid full">
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="e-desc" style="min-height:80px"></textarea>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Resultado</label>
+        <input type="text" id="e-res">
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="e-est">
+          <option>Pendiente</option>
+          <option>En proceso</option>
+          <option>Completado</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="e-pri">
+          <option>Alta</option>
+          <option>Media</option>
+          <option>Lista</option>
+          <option>Normal</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Herramienta / responsable</label>
+        <input type="text" id="e-her">
+      </div>
+    </div>
+    <input type="hidden" id="e-id">
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn btn-primary" onclick="saveEdit()">Guardar cambios</button>
+      <button class="btn btn-secondary" onclick="closeModalDirect()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const SEED = [
+  {id:1,area:'Modelo Excel / Análisis',fecha:'2026-04-30',desc:'Diagnóstico y mapeo de 61 hojas del archivo Centros de costos Binapps.xlsx. Identificación de columnas clave de Base_PYG (23.204 registros, 26 columnas).',resultado:'61 hojas mapeadas, estructura documentada',estado:'Completado',prioridad:'',herramienta:'Claude in Excel'},
+  {id:2,area:'Modelo Excel / Análisis',fecha:'2026-04-30',desc:'Identificación de 270 clientes únicos con ingresos 2025-2026 procesando la base completa de Binapps. Cruce 100% exitoso con maestro Terceros (2.166 registros).',resultado:'270 clientes identificados y enriquecidos',estado:'Completado',prioridad:'',herramienta:'Claude in Excel / Gemini'},
+  {id:3,area:'Modelo Excel / Análisis',fecha:'2026-04-30',desc:'Construcción de hoja CLIENTES_ZOHO_IMPORT con 47 columnas de Zoho CRM. 3 duplicados marcados en amarillo.',resultado:'270 registros listos para importar a Zoho CRM',estado:'Completado',prioridad:'',herramienta:'Claude in Excel'},
+  {id:4,area:'Modelo Excel / Análisis',fecha:'2026-04-30',desc:'Análisis de cruces Zoho vs ERP con semáforo de acciones. 13 clientes sin NIT recuperados desde Base_PYG.',resultado:'51 registros clasificados + 20 NITs recuperados',estado:'Completado',prioridad:'',herramienta:'Claude in Excel'},
+  {id:5,area:'Modelo Excel / Análisis',fecha:'2026-05-10',desc:'Comparativo de nómina por empleado y concepto (151 filas). Desglose por área: Admin, Ventas, Operativo.',resultado:'Costo de nómina por área identificado',estado:'Completado',prioridad:'',herramienta:'Claude in Excel'},
+  {id:6,area:'Modelo Excel / Análisis',fecha:'2026-05-10',desc:'Cálculo del costo real por hora de soporte. Metodología: (Salario + prestaciones + parafiscales) ÷ 240h/mes.',resultado:'Desarrollador: $26.926/h | Consultor soporte: $15.101/h',estado:'Completado',prioridad:'',herramienta:'Claude in Excel'},
+  {id:7,area:'Modelo Excel / Análisis',fecha:'2026-05-12',desc:'Comparativo de ventas mensual con parámetros configurables. 15 columnas con alertas de caída y ranking.',resultado:'Ventas abr 2026: $183.086.454 COP (+21,7% vs marzo)',estado:'Completado',prioridad:'',herramienta:'Claude in Excel'},
+  {id:8,area:'Modelo Excel / Análisis',fecha:'2026-05-12',desc:'Comparativo de gastos mes a mes con semáforo de alertas por rubro.',resultado:'Ingresos mayo: $149.981.334 (-18,1% vs abril)',estado:'Completado',prioridad:'',herramienta:'Claude in Excel'},
+  {id:9,area:'Modelo Excel / Análisis',fecha:'2026-05-13',desc:'Análisis de incremento de precios a clientes Binapps 2025 vs 2026. 195 filas identificando ajustes pendientes.',resultado:'Clientes sin incremento de tarifa identificados',estado:'Completado',prioridad:'',herramienta:'Gemini'},
+  {id:10,area:'Modelo Excel / Análisis',fecha:'2026-05-14',desc:'Análisis de gastos no nómina 2021-2026 (324 filas). Gastos recurrentes vs extraordinarios.',resultado:'Oportunidades de optimización de costos fijos',estado:'Completado',prioridad:'',herramienta:'Gemini'},
+  {id:11,area:'Modelo Excel / Análisis',fecha:'2026-05-14',desc:'Estructura de costos por producto Binapps: BNET, EDOCUMENTS, BPOS. 100 productos con componentes y periodicidad.',resultado:'433 filas de costos por línea de producto',estado:'Completado',prioridad:'',herramienta:'Gemini'},
+  {id:12,area:'Modelo Excel / Análisis',fecha:'2026-05-15',desc:'Prorrateo de gastos compartidos entre clientes Binapps según consumo. 508 filas, 18 columnas.',resultado:'Rentabilidad individual por cliente calculada',estado:'Completado',prioridad:'',herramienta:'Gemini'},
+  {id:13,area:'Modelo Excel / Análisis',fecha:'2026-04-30',desc:'Diagnóstico y corrección de 184 errores #NUM! en el Excel de Binapps. Causa: división por cero en Power Query.',resultado:'184 errores eliminados — modelo operativo sin errores',estado:'Completado',prioridad:'',herramienta:'Claude.ai'},
+  {id:14,area:'Power BI',fecha:'2026-05-04',desc:'Creación de tabla MedidaEstadodeResultados y 4 medidas DAX para comparativo dinámico de períodos en el modelo financiero Binapps.',resultado:'Comparativo de períodos operativo',estado:'Completado',prioridad:'',herramienta:'Power BI + Claude MCP'},
+  {id:15,area:'Power BI',fecha:'2026-05-05',desc:'Corrección de bug DAX: carácter ñ en variables internas de medidas causaba error de parseo.',resultado:'Medidas dinámicas funcionando correctamente',estado:'Completado',prioridad:'',herramienta:'Power BI + Claude MCP'},
+  {id:16,area:'Power BI',fecha:'2026-05-25',desc:'Cálculo de resultados financieros acumulados Binapps ene-abr 2026: Ingresos $738.681.517, Rentabilidad $41.807.056.',resultado:'Dashboard financiero con datos reales',estado:'Completado',prioridad:'',herramienta:'Power BI + Claude MCP'},
+  {id:17,area:'Power BI',fecha:'2026-05-26',desc:'Construcción de página Balance General en Power BI Desktop con comparativo de períodos.',resultado:'',estado:'Pendiente',prioridad:'Normal',herramienta:'Power BI Desktop'},
+  {id:18,area:'Azure',fecha:'2026-05-25',desc:'Análisis del gasto en Azure de Binapps desde abril 2025 hasta mayo 2026 — más de 13 meses de historial.',resultado:'Comportamiento completo del gasto Azure documentado',estado:'Completado',prioridad:'',herramienta:'Microsoft Azure Portal'},
+  {id:19,area:'Azure',fecha:'2026-05-25',desc:'Implementación de rutina de descarga diaria de informes de consumo Azure para comparar el gasto día a día.',resultado:'Seguimiento diario del gasto activo',estado:'Completado',prioridad:'',herramienta:'Azure Cost Management'},
+  {id:20,area:'Azure',fecha:'2026-05-25',desc:'Configuración de 12 presupuestos individuales en Azure Cost Management: total $4.482 USD/mes. Alertas al 80%, 90% y 100%.',resultado:'Control preventivo activo para todos los servicios',estado:'Completado',prioridad:'',herramienta:'Azure Portal'},
+  {id:21,area:'Azure',fecha:'2026-05-25',desc:'Configuración de logs de diagnóstico para Hybrid Connections en Log Analytics. Consulta KQL para monitorear errores por empresa.',resultado:'Monitoreo activo — <$5 USD/mes',estado:'Completado',prioridad:'',herramienta:'Azure Service Bus'},
+  {id:22,area:'Azure',fecha:'2026-05-25',desc:'Análisis de 49 Hybrid Connections: 31 activas y 19 inactivas. Plan de revisión para eliminar las innecesarias.',resultado:'Mapa de conexiones con plan de reducción',estado:'Completado',prioridad:'',herramienta:'Azure Portal'},
+  {id:23,area:'Azure',fecha:'2026-05-26',desc:'Revisión cliente a cliente de las 31 Hybrid Connections activas para eliminar las que ya no se necesitan.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Azure Portal'},
+  {id:24,area:'Hetzner',fecha:'2026-05-13',desc:'Análisis de facturas Hetzner desde enero 2025 hasta la fecha — más de 16 meses de historial de consumo por servidor.',resultado:'Línea base de consumo construida para 9 proyectos',estado:'Completado',prioridad:'',herramienta:'Hetzner Cloud'},
+  {id:25,area:'Hetzner',fecha:'2026-05-13',desc:'Detección de comportamiento anómalo de tráfico en servidor de Binapps. Análisis mes a mes desde enero 2025.',resultado:'Anomalía detectada — reporte entregado al área técnica',estado:'Completado',prioridad:'',herramienta:'Hetzner Cloud'},
+  {id:26,area:'Hetzner',fecha:'2026-05-13',desc:'Análisis del incremento de precios Hetzner del 30% (abril 2026). Tabla comparativa y lista de 9 clientes impactados.',resultado:'Informe de impacto entregado al área comercial',estado:'Completado',prioridad:'',herramienta:'Claude.ai'},
+  {id:27,area:'Hetzner',fecha:'2026-05-28',desc:'Ajuste de tarifas a los 9 clientes afectados por el incremento del 30% en Hetzner. Cálculo del valor a cobrar por cliente según el nuevo precio.',resultado:'Cálculo de cobro completado — tarifas ajustadas a los 9 clientes',estado:'Completado',prioridad:'',herramienta:'Área comercial'},
+  {id:28,area:'TD Synnex',fecha:'2026-05-26',desc:'Exploración del portal TD Synnex. Identificación del flujo de facturación Azure y licencias Microsoft a Binapps como CSP.',resultado:'Flujo Synnex→Binapps documentado',estado:'Completado',prioridad:'',herramienta:'Portal TD Synnex'},
+  {id:29,area:'TD Synnex',fecha:'2026-05-26',desc:'Descarga y análisis de facturas de consumo Azure ene–may 2026 desde Synnex. Cruce con portal Azure.',resultado:'Coherencia entre Synnex y Azure confirmada',estado:'Completado',prioridad:'',herramienta:'Portal TD Synnex'},
+  {id:30,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Múltiples reuniones de exploración de Zoho CRM Plus. Organización de estructura base: clientes, productos, formularios y etiquetas.',resultado:'Estructura base del CRM organizada',estado:'Completado',prioridad:'',herramienta:'Zoho CRM Plus'},
+  {id:31,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Creación de campos personalizados en Zoho Desk: Producto, Módulo y Origen del Error. Revisión del formato del ticket para calcular costo por producto y cliente.',resultado:'Tickets capturan producto y módulo — antes no era posible',estado:'Completado',prioridad:'',herramienta:'Zoho Desk'},
+  {id:32,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Diseño del flujo de bolsa de horas: CRM registra contrato (bolsa total) → Desk registra tiempo por ticket. Alertas vencimiento a 30, 15 y 0 días.',resultado:'Modelo de control de horas diseñado',estado:'Completado',prioridad:'',herramienta:'Zoho CRM Plus'},
+  {id:33,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Parametrización del campo Cliente como obligatorio en el ticket de soporte.',resultado:'Campo obligatorio activo',estado:'Completado',prioridad:'',herramienta:'Zoho Desk'},
+  {id:34,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Análisis del consumo y facturas del cliente AGROVAR desde enero 2025 hasta la fecha.',resultado:'Análisis entregado al área responsable',estado:'Completado',prioridad:'',herramienta:'Claude.ai'},
+  {id:35,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'[Edwin] Revisar categorías/subcategorías para usar productos y módulos en lugar de etiquetas. Socializar que se dejan en lista desplegable.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Zoho Desk'},
+  {id:36,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'[Edwin] Socializar qué hace la IA con las etiquetas y por qué se cambia a campos de selección.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Capacitación'},
+  {id:37,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'[Edwin] Revisar el formato de clientes en el CRM.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Zoho CRM'},
+  {id:38,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Crear los productos en ambos módulos: CRM y Desk.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Zoho CRM + Desk'},
+  {id:39,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'[Edwin] Preguntar si es necesario el valor unitario en los productos.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Edwin'},
+  {id:40,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'[Edwin] Preguntar qué otros campos requieren para dar soporte al cliente.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Edwin'},
+  {id:41,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Importar los 270 clientes a Zoho CRM (omitir 3 duplicados en amarillo).',resultado:'',estado:'Pendiente',prioridad:'Lista',herramienta:'Zoho CRM'},
+  {id:42,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'[Edwin] Validar lista de clientes con soporte activo. Solo aparecen 23 — verificar si están todos.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Zoho'},
+  {id:43,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Crear pólizas de soporte a los clientes que tienen este servicio contratado.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Zoho CRM'},
+  {id:44,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Revisar con el área comercial el formato de cliente en el CRM.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Área comercial + Edwin'},
+  {id:45,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Crear contratos de clientes en Zoho con información detallada y adjuntar contrato firmado si aplica.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Zoho CRM'},
+  {id:46,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'[Edwin] Verificar si necesitan segundo campo de contacto en formato de cliente CRM.',resultado:'',estado:'Pendiente',prioridad:'Normal',herramienta:'Edwin'},
+  {id:47,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Crear o revisar productos en el módulo de CRM.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Zoho CRM'},
+  {id:48,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'[Edwin] Explicar que ya no se usarán etiquetas sino los campos Producto, Módulo y Tipo de Error.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Capacitación'},
+  {id:49,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'[Edwin] Revisar en conjunto productos y módulos en CRM y en Desk.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Zoho'},
+  {id:50,area:'Área de soporte / Zoho',fecha:'2026-05-26',desc:'Registrar el valor de hora de soporte por cada agente.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Zoho Desk / Excel'},
+  {id:51,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-21',desc:'Revisión del plan de cuentas completo de Binapps. Depuración de cuentas duplicadas. Configuración IVA: Excluido (Art. 476 ET) vs Exento 0% (Art. 481 ET).',resultado:'Plan de cuentas depurado y clasificado',estado:'Completado',prioridad:'',herramienta:'BNET ERP'},
+  {id:52,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-22',desc:'Diagnóstico y corrección del error de contabilización de nómina: concepto sin cuentaID impedía contabilizar el comprobante LF01.',resultado:'Parametrización corregida — conceptos Vacaciones, Cesantías, Intereses y Bono',estado:'Completado',prioridad:'',herramienta:'BNET ERP'},
+  {id:53,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-22',desc:'Acompañamiento al auxiliar contable en la parametrización de conceptos de nómina y contabilización de gastos no nómina.',resultado:'Correcta contabilización guiada y verificada',estado:'Completado',prioridad:'',herramienta:'BNET ERP'},
+  {id:54,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-12',desc:'Revisión de todos los productos de ventas de Binapps. CONF PROD VENTA FINAL con 100 productos configurados.',resultado:'100 productos configurados y documentados',estado:'Completado',prioridad:'',herramienta:'BNET ERP'},
+  {id:55,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-12',desc:'Revisión de todos los productos de compras/gastos de Binapps: cuenta de gasto, centro de costo y tratamiento tributario.',resultado:'Catálogo de gastos correctamente parametrizado',estado:'Completado',prioridad:'',herramienta:'BNET ERP'},
+  {id:56,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-15',desc:'Depuración de cuentas por cobrar y por pagar: saldos sin tercero, documentos cruzados, cartera vencida. Ajuste de informes de consulta.',resultado:'Cuentas depuradas e informes ajustados',estado:'Completado',prioridad:'',herramienta:'BNET ERP'},
+  {id:57,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-18',desc:'Apoyo en gestión de declaración ICA Ibagué: análisis del requerimiento y elaboración del correo de respuesta.',resultado:'Correo de cancelación de registro elaborado',estado:'Completado',prioridad:'',herramienta:'Claude.ai'},
+  {id:58,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-26',desc:'Completar depuración de cartera pendiente: saldos sin tercero y documentos cruzados.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'BNET ERP'},
+  {id:68,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-28',desc:'Apoyo al auxiliar contable con dudas en contabilización y manejo de centros de costo.',resultado:'Dudas resueltas — procesos contables orientados correctamente',estado:'Completado',prioridad:'',herramienta:'BNET ERP'},
+  {id:59,area:'Comercial',fecha:'2026-05-28',desc:'Homologación de productos de venta de Binapps con el nuevo modelo: estandarización de nomenclatura, codificación y estructura.',resultado:'',estado:'En proceso',prioridad:'',herramienta:'BNET ERP'},
+  {id:60,area:'Comercial',fecha:'2026-05-26',desc:'Revisar la línea de comercialización con toda su estructura: productos, precios, condiciones y márgenes.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'BNET ERP + Área comercial'},
+  {id:61,area:'General',fecha:'2026-05-26',desc:'Revisar con el área de desarrollo la plataforma Azure DevOps que usan para gestionar sus proyectos.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Azure DevOps'},
+  {id:69,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Investigación y análisis de la información necesaria para realizar la valoración de Binapps S.A.S. Revisión y diagnóstico de 29 ítems de datos requeridos (financieros, operativos, legales y de mercado).',resultado:'Diagnóstico completo: 10 ítems disponibles, 6 parciales, 13 faltantes',estado:'Completado',prioridad:'',herramienta:'Excel + Claude.ai'},
+  {id:70,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Identificación de información financiera disponible para la valoración: ingresos históricos 5 años (2021-2025 + YTD 2026), EBITDA 2024 $167MM (10.9%), flujo de caja 2025-2026, balance completo 2024-2025, deuda financiera detallada.',resultado:'Base financiera sólida confirmada en hoja Base_PYG y Balance',estado:'Completado',prioridad:'',herramienta:'Excel — Base_PYG / Balance'},
+  {id:71,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Identificación de brechas críticas para la valoración: software Binapps no capitalizado contablemente ($0 en intangibles), sin plan de negocios formal, sin registro de propiedad intelectual SIC, sin análisis de churn, sin composición accionaria disponible.',resultado:'13 brechas documentadas con impacto en el valor estimado',estado:'Completado',prioridad:'',herramienta:'Excel + Claude.ai'},
+  {id:72,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Definir el propósito de la valoración de Binapps (venta, inversión, crédito o fusión) — determina el método y primas/descuentos aplicables.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Gerencia'},
+  {id:73,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Calcular la WACC para la valoración: obtener TES 10 años, prima de riesgo Colombia, beta sector software Pyme Latam y costo de equity.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Claude.ai + fuentes financieras'},
+  {id:74,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Construir proyecciones de ingresos y gastos (plan de negocios) para la valoración. Usar CAGR histórico +40% como base con escenarios conservador, base y optimista.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Excel'},
+  {id:75,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Calcular concentración de clientes: verificar si el top 5 representa más del 50% de ingresos — dato crítico para la certidumbre de las proyecciones.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Excel — hoja Comparativo Ventas'},
+  {id:76,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Levantar información de contratos con clientes: tipo (recurrente mensual, anual, proyecto único), valor contratado total (backlog) y tasa de churn histórica.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Zoho CRM + BNET ERP'},
+  {id:77,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Obtener composición accionaria actual de Binapps: libro de accionistas o certificado Cámara de Comercio con % de participación por socio.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Gerencia / Cámara de Comercio'},
+  {id:78,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Gestionar el registro de propiedad intelectual del software Binapps ante la SIC. Actualmente no registrado — reduce certeza legal sobre el activo principal.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'SIC / Área legal'},
+  {id:80,area:'Azure',fecha:'2026-05-28',desc:'Seguimiento diario del gasto en Azure: revisión y comparación del consumo del día vs días anteriores. Verificación de que los servicios se mantienen dentro del presupuesto configurado.',resultado:'Seguimiento diario ejecutado — sin alertas de desviación',estado:'Completado',prioridad:'',herramienta:'Azure Cost Management'},
+  {id:81,area:'Área de soporte / Zoho',fecha:'2026-05-28',desc:'Configuración de las alertas de vencimiento de contratos en Zoho CRM: automatización de notificaciones a 30, 15 y 0 días antes del vencimiento de cada contrato de cliente.',resultado:'Alertas de vencimiento configuradas y activas',estado:'Completado',prioridad:'',herramienta:'Zoho CRM — Flujos de trabajo'},
+  {id:82,area:'Área de soporte / Zoho',fecha:'2026-05-28',desc:'Configuración del formato de cuentas en Zoho CRM: revisión y ajuste de los campos del módulo Cuentas para que capture toda la información necesaria del cliente.',resultado:'',estado:'Pendiente',prioridad:'Lista',herramienta:'Zoho CRM — Personalización'},
+  {id:79,area:'Valoración Empresa',fecha:'2026-05-28',desc:'Investigar múltiplos de empresas comparables para la valoración por comparables: Siigo, Alegra, Aspel y otros ERP Pyme Latam (EV/EBITDA, P/E).',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Claude.ai + fuentes sectoriales'},
+  {id:62,area:'Área de soporte / Zoho',fecha:'2026-05-27',desc:'[Edwin] Agregar campo NIT y campo Rol/Cargo del contacto en el formato de cliente del CRM. Identificar quién es el contacto y qué posición ocupa dentro de la empresa.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Zoho CRM'},
+  {id:63,area:'Área de soporte / Zoho',fecha:'2026-05-27',desc:'Revisar por qué el usuario de ventas no puede ver todos los contactos disponibles en Zoho. Identificar el problema de permisos o visibilidad.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Zoho CRM — Configuración'},
+  {id:64,area:'Área de soporte / Zoho',fecha:'2026-05-27',desc:'Revisar por qué en el módulo de contrato de clientes el perfil de ventas no puede ver el cliente creado. Ajustar permisos de visibilidad.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Zoho CRM — Permisos'},
+  {id:65,area:'Comercial',fecha:'2026-05-27',desc:'Revisión y configuración de la línea de comercialización de Binapps: estructura completa de productos, precios, condiciones comerciales y márgenes.',resultado:'',estado:'En proceso',prioridad:'',herramienta:'BNET ERP + Área comercial'},
+  {id:66,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-27',desc:'Revisión del plan de cuentas de Binapps: verificación de la estructura vigente, identificación de ajustes pendientes y actualización de clasificaciones.',resultado:'',estado:'En proceso',prioridad:'',herramienta:'BNET ERP'},
+  {id:67,area:'Plan de cuentas / Contabilidad',fecha:'2026-05-27',desc:'Revisión de productos de Binapps y configuración de modelos de contabilización: parametrización de cuentas de ingreso, costo y gasto por línea de producto.',resultado:'',estado:'En proceso',prioridad:'',herramienta:'BNET ERP'},
+];
+
+let AREAS = ['Área de soporte / Zoho','Plan de cuentas / Contabilidad','Modelo Excel / Análisis','Power BI','Azure','Hetzner','TD Synnex','Comercial','Valoración Empresa','General'];
+const STORE_KEY = 'binapps_gestion_v1';
+
+let acts = [], nextId = 1, filterArea = 'todas';
+
+function load() {
+  try {
+    const s = localStorage.getItem(STORE_KEY);
+    if(s) { const d = JSON.parse(s); acts = d.acts || []; nextId = d.nextId || 1; }
+    else { acts = SEED.map(a=>({...a})); nextId = 83; save(); }
+  } catch(e) { acts = SEED.map(a=>({...a})); nextId = 62; }
+}
+
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({acts, nextId})); } catch(e){}
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function goTo(tab) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  document.querySelectorAll('.nav-btn')[['dashboard','actividades','pendientes','X','agregar','informe'].indexOf(tab)] && 
+    document.querySelectorAll('.nav-btn')[['dashboard','actividades','pendientes','agregar','informe'].indexOf(tab)].classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>{ if(b.textContent.trim().toLowerCase().includes(tab.replace('page-',''))) b.classList.add('active'); });
+  if(tab==='dashboard') renderDash();
+  if(tab==='actividades') renderActs();
+  if(tab==='pendientes') renderPend();
+}
+
+function bc(p){return p==='Alta'?'badge-alta':p==='Media'?'badge-media':p==='Lista'?'badge-lista':'badge-normal';}
+function bl(p){return p==='Alta'?'🔴 Alta':p==='Media'?'🟠 Media':p==='Lista'?'✅ Lista':'🟡 Normal';}
+
+function renderDash() {
+  document.getElementById('dash-fecha').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const total=acts.length, comp=acts.filter(a=>a.estado==='Completado').length;
+  const pend=acts.filter(a=>a.estado==='Pendiente').length;
+  const altas=acts.filter(a=>a.estado==='Pendiente'&&a.prioridad==='Alta').length;
+  document.getElementById('kpi-grid').innerHTML=`
+    <div class="kpi blue"><div class="kpi-num">${total}</div><div class="kpi-lbl">Actividades totales</div></div>
+    <div class="kpi green"><div class="kpi-num">${comp}</div><div class="kpi-lbl">Completadas</div></div>
+    <div class="kpi amber"><div class="kpi-num">${pend}</div><div class="kpi-lbl">Pendientes</div></div>
+    <div class="kpi red"><div class="kpi-num">${altas}</div><div class="kpi-lbl">Prioridad alta</div></div>`;
+  document.getElementById('progress-list').innerHTML=AREAS.map(area=>{
+    const ta=acts.filter(a=>a.area===area).length;
+    const da=acts.filter(a=>a.area===area&&a.estado==='Completado').length;
+    if(!ta) return '';
+    const pct=Math.round(da/ta*100);
+    return`<div class="prog-item"><div class="prog-header"><span>${area}</span><span>${da}/${ta}</span></div><div class="prog-bar"><div class="prog-fill ${pct===100?'full':''}" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+  const recent=[...acts].sort((a,b)=>b.id-a.id).slice(0,6);
+  document.getElementById('recent-list').innerHTML=recent.map(a=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border-light);display:flex;gap:10px;align-items:flex-start">
+      <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;background:${a.estado==='Completado'?'var(--green)':'var(--amber)'}"></div>
+      <div><div style="font-size:12.5px;line-height:1.4">${a.desc.substring(0,75)}${a.desc.length>75?'…':''}</div>
+      <div style="font-size:11px;color:var(--text-soft);margin-top:3px">${a.area} · ${a.fecha}</div></div>
+    </div>`).join('');
+}
+
+function actHTML(a, showDel=true) {
+  const badges = a.estado==='Pendiente'?`<span class="badge ${bc(a.prioridad)}">${bl(a.prioridad)}</span>`:
+                 a.estado==='En proceso'?`<span class="badge badge-proceso">⚡ En proceso</span>`:'';
+  return `<div class="act-item" id="act-${a.id}">
+    <div class="act-check ${a.estado==='Completado'?'done':''}" onclick="toggle(${a.id})"></div>
+    <div class="act-body">
+      <div class="act-desc ${a.estado==='Completado'?'done':''}">${a.desc}</div>
+      <div class="act-meta"><span class="badge-area">${a.area}</span>${a.fecha}${a.herramienta?' · '+a.herramienta:''}</div>
+      ${a.resultado?`<div class="act-result">${a.resultado}</div>`:''}
+      ${badges}
+    </div>
+    <div class="act-actions">
+    <button class="icon-btn" onclick="openEdit(${a.id})" title="Editar" style="color:var(--text-soft)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:14px;height:14px;stroke-width:1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+    ${showDel?`<button class="icon-btn" onclick="del(${a.id})" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:14px;height:14px;stroke-width:1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`:''}
+  </div>
+  </div>`;
+}
+
+function renderActs() {
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase().trim();
+  let list = filterArea==='todas' ? acts : acts.filter(a=>a.area===filterArea);
+  if(q) list = list.filter(a=>a.desc.toLowerCase().includes(q)||(a.resultado||'').toLowerCase().includes(q)||(a.herramienta||'').toLowerCase().includes(q));
+  document.getElementById('acts-count').textContent = `${list.length} actividades`;
+  const sc = document.getElementById('search-count');
+  if(sc) sc.textContent = q ? `${list.length} resultado${list.length!==1?'s':''}` : '';
+  document.getElementById('area-filters').innerHTML=
+    ['todas',...AREAS].map(a=>`<button class="filter-chip ${filterArea===a?'active':''}" onclick="setF('${a}')">${a==='todas'?'Todas':a}</button>`).join('');
+  document.getElementById('all-acts').innerHTML = list.length
+    ? list.map(a=>actHTML(a)).join('')
+    : `<div class="empty">${q?'Sin resultados para "'+q+'"':'Sin actividades en esta área'}</div>`;
+}
+
+const AREA_COLORS = {
+  'Área de soporte / Zoho': '#2563eb',
+  'Plan de cuentas / Contabilidad': '#16a34a',
+  'Modelo Excel / Análisis': '#059669',
+  'Power BI': '#7c3aed',
+  'Azure': '#0284c7',
+  'Hetzner': '#dc2626',
+  'TD Synnex': '#d97706',
+  'Comercial': '#db2777',
+  'Valoración Empresa': '#0e7490',
+  'General': '#6b7280',
+};
+
+function renderPend() {
+  const pend = acts.filter(a=>a.estado!=='Completado');
+  const total = pend.length;
+  const altas = pend.filter(a=>a.prioridad==='Alta').length;
+  document.getElementById('pend-total-sub').textContent =
+    `${total} pendiente${total!==1?'s':''} en total · ${altas} de prioridad alta`;
+
+  const priOrd = ['Alta','Media','Lista','Normal',''];
+  const areasWithPend = AREAS.filter(area=>pend.some(a=>a.area===area));
+  const container = document.getElementById('pend-area-cards');
+
+  if(!total){ container.innerHTML = '<div class="empty" style="grid-column:1/-1">🎉 Sin pendientes — todo al día</div>'; return; }
+
+  container.innerHTML = areasWithPend.map(area=>{
+    const items = pend.filter(a=>a.area===area);
+    const color = AREA_COLORS[area] || '#6b7280';
+    const altasC = items.filter(a=>a.prioridad==='Alta').length;
+    const mediaC = items.filter(a=>a.prioridad==='Media').length;
+    const procesoC = items.filter(a=>a.estado==='En proceso').length;
+    return `<div class="area-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);transition:all .15s;border-left:4px solid ${color};position:relative"
+  onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-md)'"
+  onmouseout="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+  <button class="area-edit-btn" onclick="event.stopPropagation();startRenameArea('${area.replace(/'/g,"\'")}',this)" title="Renombrar área">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;stroke-width:2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Renombrar
+  </button>
+  <div id="area-label-${area.replace(/[^a-zA-Z0-9]/g,'_')}" onclick="drillArea('${area.replace(/'/g,"\'")}')
+" style="cursor:pointer">
+    <div style="font-size:11px;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${area}</div>
+    <div style="font-size:32px;font-weight:600;color:var(--text);line-height:1;margin-bottom:10px">${items.length}</div>
+    <div style="font-size:11.5px;color:var(--text-soft)">pendiente${items.length!==1?'s':''}</div>
+    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+      ${altasC>0?`<span style="background:var(--red-light);color:var(--red);font-size:11px;padding:2px 7px;border-radius:99px;font-weight:500">🔴 ${altasC} alta${altasC!==1?'s':''}</span>`:''}
+      ${mediaC>0?`<span style="background:var(--amber-light);color:var(--amber);font-size:11px;padding:2px 7px;border-radius:99px;font-weight:500">🟠 ${mediaC} media${mediaC!==1?'s':''}</span>`:''}
+      ${procesoC>0?`<span style="background:var(--purple-light);color:var(--purple);font-size:11px;padding:2px 7px;border-radius:99px;font-weight:500">⚡ ${procesoC} en proceso</span>`:''}
+    </div>
+  </div>
+</div>`;
+  }).join('');
+}
+
+function drillArea(area) {
+  const pend = acts.filter(a=>a.estado!=='Completado'&&a.area===area);
+  const priOrd = ['Alta','Media','Lista','Normal',''];
+  pend.sort((a,b)=>priOrd.indexOf(a.prioridad)-priOrd.indexOf(b.prioridad));
+  document.getElementById('pend-detail-title').textContent = area;
+  document.getElementById('pend-detail-sub').textContent =
+    `${pend.length} pendiente${pend.length!==1?'s':''}`;
+  document.getElementById('pend-detail-list').innerHTML =
+    pend.length ? pend.map(a=>actHTML(a,true)).join('') : '<div class="empty">Sin pendientes en esta área</div>';
+  document.getElementById('pend-overview').style.display = 'none';
+  document.getElementById('pend-detail').style.display = 'block';
+}
+
+function startRenameArea(area, btn) {
+  const safeId = area.replace(/[^a-zA-Z0-9]/g,'_');
+  const labelDiv = document.getElementById('area-label-'+safeId);
+  if(!labelDiv) return;
+  const card = btn.closest('.area-card');
+  const color = card.style.borderLeftColor || '#2563eb';
+
+  // Replace label with input
+  const currentName = area;
+  labelDiv.innerHTML = `
+    <div style="font-size:11px;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Nuevo nombre</div>
+    <input class="area-name-input" id="rename-input-${safeId}" value="${currentName}"
+      onclick="event.stopPropagation()"
+      onkeydown="if(event.key==='Enter')confirmRename('${area.replace(/'/g,"\'")}',this.value);if(event.key==='Escape')renderPend()">
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button onclick="event.stopPropagation();confirmRename('${area.replace(/'/g,"\'")}',document.getElementById('rename-input-${safeId}').value)"
+        style="background:var(--blue);color:white;border:none;border-radius:5px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">
+        Guardar
+      </button>
+      <button onclick="event.stopPropagation();renderPend()"
+        style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;color:var(--text-muted)">
+        Cancelar
+      </button>
+    </div>`;
+  btn.style.display = 'none';
+  setTimeout(()=>document.getElementById('rename-input-'+safeId)?.focus(),50);
+}
+
+function confirmRename(oldName, newName) {
+  newName = newName.trim();
+  if(!newName || newName === oldName) { renderPend(); return; }
+
+  // Update AREAS array
+  const idx = AREAS.indexOf(oldName);
+  if(idx !== -1) AREAS[idx] = newName;
+
+  // Update all activities with this area
+  acts.forEach(a=>{ if(a.area===oldName) a.area=newName; });
+
+  // Update AREA_COLORS
+  if(AREA_COLORS[oldName]) { AREA_COLORS[newName] = AREA_COLORS[oldName]; delete AREA_COLORS[oldName]; }
+
+  // Save and re-render
+  save();
+  toast(`✅ "${oldName}" renombrada a "${newName}"`);
+  renderPend();
+  // Update selects in forms
+  updateAreaSelects();
+}
+
+function updateAreaSelects() {
+  ['f-area','e-area','inf-area'].forEach(id=>{
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    const current = sel.value;
+    // Rebuild options
+    const isInf = id==='inf-area';
+    sel.innerHTML = (isInf?'<option value="">Todas las áreas</option>':'')+
+      AREAS.map(a=>`<option${a===current?' selected':''}>${a}</option>`).join('');
+  });
+}
+
+function backToOverview() {
+  document.getElementById('pend-detail').style.display = 'none';
+  document.getElementById('pend-overview').style.display = 'block';
+  renderPend();
+}
+
+function setF(a) { filterArea=a; renderActs(); }
+
+function toggle(id) {
+  const a=acts.find(x=>x.id===id); if(!a)return;
+  a.estado = a.estado==='Completado'?'Pendiente':'Completado';
+  if(a.estado==='Completado'){ a.prioridad=''; toast('✅ Marcado como completado'); }
+  save();
+  const active = document.querySelector('.page.active').id;
+  if(active==='page-actividades') renderActs();
+  if(active==='page-pendientes') renderPend();
+  if(active==='page-dashboard') renderDash();
+}
+
+function del(id) {
+  if(!confirm('¿Eliminar esta actividad?')) return;
+  acts = acts.filter(a=>a.id!==id);
+  save(); renderActs(); toast('Actividad eliminada');
+}
+
+function addAct() {
+  const desc = document.getElementById('f-desc').value.trim();
+  if(!desc){ alert('Escribe la descripción de la actividad.'); return; }
+  const est = document.getElementById('f-est').value;
+  acts.push({
+    id: nextId++,
+    area: document.getElementById('f-area').value,
+    fecha: document.getElementById('f-fecha').value || new Date().toISOString().slice(0,10),
+    desc,
+    resultado: document.getElementById('f-res').value.trim(),
+    estado: est,
+    prioridad: est==='Pendiente' ? document.getElementById('f-pri').value : '',
+    herramienta: document.getElementById('f-her').value.trim()
+  });
+  save(); clearForm(); toast('✅ Actividad guardada');
+  goTo('actividades');
+}
+
+function clearForm() {
+  ['f-desc','f-res','f-her'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('f-est').value = 'Pendiente';
+}
+
+function genReport() {
+  const per=document.getElementById('inf-per').value;
+  const aut=document.getElementById('inf-aut').value;
+  const af=document.getElementById('inf-area').value;
+  const ic=document.getElementById('inc-c').checked, ip=document.getElementById('inc-p').checked;
+  let fl = af ? acts.filter(a=>a.area===af) : acts;
+  const comp=fl.filter(a=>a.estado==='Completado'), pend=fl.filter(a=>a.estado!=='Completado');
+  let out=`══════════════════════════════════════════════════
+BINAPPS S.A.S — INFORME DE GESTIÓN
+Período: ${per}
+Preparado por: ${aut}
+Fecha de generación: ${new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'})}
+${af?'Área: '+af:'Todas las áreas'}
+══════════════════════════════════════════════════
+
+RESUMEN EJECUTIVO
+Total de actividades: ${fl.length}
+Completadas: ${comp.length} (${fl.length?Math.round(comp.length/fl.length*100):0}% de ejecución)
+Pendientes: ${pend.length}
+
+`;
+  if(ic&&comp.length){
+    const us=[...new Set(comp.map(a=>a.area))];
+    out+=`ACTIVIDADES REALIZADAS\n${'─'.repeat(54)}\n`;
+    us.forEach(area=>{
+      const acs=comp.filter(a=>a.area===area);
+      out+=`\n${area.toUpperCase()} (${acs.length} actividades)\n`;
+      acs.forEach((a,i)=>{ out+=`  ${i+1}. ${a.desc}\n`; if(a.resultado) out+=`     → ${a.resultado}\n`; });
+    });
+    out+='\n';
+  }
+  if(ip&&pend.length){
+    out+=`PENDIENTES Y PRÓXIMOS PASOS\n${'─'.repeat(54)}\n`;
+    pend.sort((a,b)=>['Alta','Media','Lista','Normal',''].indexOf(a.prioridad)-['Alta','Media','Lista','Normal',''].indexOf(b.prioridad));
+    pend.forEach((a,i)=>{
+      const lbl=a.estado==='En proceso'?'[⚡ EN PROCESO]':a.prioridad==='Alta'?'[🔴 ALTA]':a.prioridad==='Media'?'[🟠 MEDIA]':a.prioridad==='Lista'?'[✅ LISTA]':'[🟡 NORMAL]';
+      out+=`  ${i+1}. ${lbl} ${a.desc}\n     ${a.area}${a.herramienta?' | '+a.herramienta:''}\n`;
+    });
+  }
+  out+=`\n══════════════════════════════════════════════════\nBINAPPS S.A.S — Documento de uso interno`;
+  const el = document.getElementById('report-out');
+  el.textContent = out; el.style.display='block';
+}
+
+function copyReport() {
+  const t = document.getElementById('report-out').textContent;
+  if(!t){ alert('Primero genera el informe.'); return; }
+  navigator.clipboard.writeText(t).then(()=>toast('✅ Informe copiado al portapapeles'));
+}
+
+function openEdit(id) {
+  const a = acts.find(x=>x.id===id); if(!a) return;
+  document.getElementById('e-id').value = a.id;
+  document.getElementById('e-area').value = a.area;
+  document.getElementById('e-fecha').value = a.fecha;
+  document.getElementById('e-desc').value = a.desc;
+  document.getElementById('e-res').value = a.resultado||'';
+  document.getElementById('e-est').value = a.estado;
+  document.getElementById('e-pri').value = a.prioridad||'Normal';
+  document.getElementById('e-her').value = a.herramienta||'';
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeModal(e) { if(e.target===document.getElementById('edit-modal')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('edit-modal').classList.remove('open'); }
+function saveEdit() {
+  const id = parseInt(document.getElementById('e-id').value);
+  const a = acts.find(x=>x.id===id); if(!a) return;
+  a.area = document.getElementById('e-area').value;
+  a.fecha = document.getElementById('e-fecha').value;
+  a.desc = document.getElementById('e-desc').value.trim();
+  a.resultado = document.getElementById('e-res').value.trim();
+  a.estado = document.getElementById('e-est').value;
+  a.prioridad = a.estado==='Pendiente' ? document.getElementById('e-pri').value : '';
+  a.herramienta = document.getElementById('e-her').value.trim();
+  save(); closeModalDirect(); toast('✅ Actividad actualizada');
+  const active = document.querySelector('.page.active').id;
+  if(active==='page-actividades') renderActs();
+  if(active==='page-pendientes') renderPend();
+  if(active==='page-dashboard') renderDash();
+}
+
+// INIT
+load();
+document.getElementById('f-fecha').value = new Date().toISOString().slice(0,10);
+// Fix nav active state
+document.querySelectorAll('.nav-btn').forEach((b,i)=>{
+  const tabs=['dashboard','actividades','pendientes','agregar','informe'];
+  b.addEventListener('click',()=>{ document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); });
+});
+renderDash();
+</script>
+</body>
+</html>
