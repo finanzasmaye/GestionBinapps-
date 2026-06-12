@@ -853,6 +853,11 @@ const SEED = [
   {id:89,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Reunión con jefe: socialización de costos de Zoho CRM Plus y Claude IA utilizados en Binapps. Presentación del valor generado vs costo de las herramientas.',resultado:'Costos de herramientas tecnológicas socializados con la dirección',estado:'Completado',prioridad:'',herramienta:'Reunión gerencial'},
   {id:90,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Revisión con jefe de costos de eventos comerciales y marketing de la empresa: análisis del gasto en actividades comerciales y su impacto en el presupuesto.',resultado:'Costos de marketing y eventos comerciales analizados',estado:'Completado',prioridad:'',herramienta:'Reunión gerencial'},
   {id:91,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Revisión de costos financieros por área con la dirección: análisis de la estructura de gastos por centro de costo y distribución del gasto operativo.',resultado:'Costos financieros por área revisados y socializados',estado:'Completado',prioridad:'',herramienta:'Reunión gerencial'},
+  {id:92,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Calcular y estructurar los costos por área funcional de Binapps: Área de Desarrollo, Área Comercial y Área Administrativa.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Excel — BNET ERP'},
+  {id:93,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Organizar comparativo de costos entre Zoho CRM, SOHO y Juan (solución actual vs alternativas): comparar funcionalidades, costos y valor generado.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Excel'},
+  {id:94,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Revisar facturas de eventos del año 2025: cruzar facturas de transporte aéreo y viajes con los eventos comerciales a los que pertenecen para asignar el costo correctamente.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'BNET ERP — Contabilidad'},
+  {id:95,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Organizar y documentar cómo está compuesta la infraestructura administrativa y tecnológica de Binapps: servidores, licencias, plataformas y herramientas.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Azure + Hetzner + Zoho + otras plataformas'},
+  {id:96,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Estructurar los costos administrativos de funcionamiento: arriendo, servicios públicos, papelería y demás gastos fijos de operación de la empresa.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'BNET ERP — Plan de cuentas'},
   {id:79,area:'3. VALORACIÓN DE EMPRESAS',fecha:'2026-05-28',desc:'Investigar múltiplos de empresas comparables para la valoración por comparables: Siigo, Alegra, Aspel y otros ERP Pyme Latam (EV/EBITDA, P/E).',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Claude.ai + fuentes sectoriales'},
   {id:62,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-05-27',desc:'[Edwin] Agregar campo NIT y campo Rol/Cargo del contacto en el formato de cliente del CRM. Identificar quién es el contacto y qué posición ocupa dentro de la empresa.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Zoho CRM'},
   {id:63,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-05-27',desc:'Revisar por qué el usuario de ventas no puede ver todos los contactos disponibles en Zoho. Identificar el problema de permisos o visibilidad.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Zoho CRM — Configuración'},
@@ -871,7 +876,7 @@ function load() {
   try {
     const s = localStorage.getItem(STORE_KEY);
     if(s) { const d = JSON.parse(s); acts = d.acts || []; nextId = d.nextId || 1; }
-    else { acts = SEED.map(a=>({...a})); nextId = 92; save(); }
+    else { acts = SEED.map(a=>({...a})); nextId = 97; save(); }
   } catch(e) { acts = SEED.map(a=>({...a})); nextId = 62; }
 }
 
