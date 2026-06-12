@@ -848,6 +848,11 @@ const SEED = [
   {id:84,area:'4. COSTEO DE PROYECTOS',fecha:'2026-06-09',desc:'Revisión de costos de proyectos específicos de Binapps y elaboración de presupuestos para proyectos requeridos.',resultado:'Presupuestos de proyectos elaborados',estado:'Completado',prioridad:'',herramienta:'Excel'},
   {id:85,area:'2. SEGUIMIENTO MENSUAL CONTABILIDAD',fecha:'2026-06-09',desc:'Cierre financiero mensual con la auxiliar contable: revisión de movimientos, conciliaciones y validación de saldos del período.',resultado:'Cierre financiero del período realizado',estado:'Completado',prioridad:'',herramienta:'BNET ERP'},
   {id:86,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-09',desc:'Apoyo en la automatización del envío de certificados digitales a clientes de Binapps.',resultado:'',estado:'En proceso',prioridad:'',herramienta:'BNET ERP / Claude.ai'},
+  {id:87,area:'2. SEGUIMIENTO MENSUAL CONTABILIDAD',fecha:'2026-06-11',desc:'Reunión con la auxiliar contable: identificación y corrección de errores en facturas desbalanceadas. Revisión de descuadres contables y ajuste de comprobantes.',resultado:'Errores en facturas corregidos — facturas balanceadas',estado:'Completado',prioridad:'',herramienta:'BNET ERP'},
+  {id:88,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Reunión con Néstor para revisión de la homologación de los productos de venta: alineación de nomenclatura, codificación y estructura del catálogo.',resultado:'Homologación de productos revisada con el área comercial',estado:'Completado',prioridad:'',herramienta:'BNET ERP — Néstor'},
+  {id:89,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Reunión con jefe: socialización de costos de Zoho CRM Plus y Claude IA utilizados en Binapps. Presentación del valor generado vs costo de las herramientas.',resultado:'Costos de herramientas tecnológicas socializados con la dirección',estado:'Completado',prioridad:'',herramienta:'Reunión gerencial'},
+  {id:90,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Revisión con jefe de costos de eventos comerciales y marketing de la empresa: análisis del gasto en actividades comerciales y su impacto en el presupuesto.',resultado:'Costos de marketing y eventos comerciales analizados',estado:'Completado',prioridad:'',herramienta:'Reunión gerencial'},
+  {id:91,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-06-11',desc:'Revisión de costos financieros por área con la dirección: análisis de la estructura de gastos por centro de costo y distribución del gasto operativo.',resultado:'Costos financieros por área revisados y socializados',estado:'Completado',prioridad:'',herramienta:'Reunión gerencial'},
   {id:79,area:'3. VALORACIÓN DE EMPRESAS',fecha:'2026-05-28',desc:'Investigar múltiplos de empresas comparables para la valoración por comparables: Siigo, Alegra, Aspel y otros ERP Pyme Latam (EV/EBITDA, P/E).',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Claude.ai + fuentes sectoriales'},
   {id:62,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-05-27',desc:'[Edwin] Agregar campo NIT y campo Rol/Cargo del contacto en el formato de cliente del CRM. Identificar quién es el contacto y qué posición ocupa dentro de la empresa.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Zoho CRM'},
   {id:63,area:'1. DETERMINAR COSTOS EMPRESARIALES',fecha:'2026-05-27',desc:'Revisar por qué el usuario de ventas no puede ver todos los contactos disponibles en Zoho. Identificar el problema de permisos o visibilidad.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Zoho CRM — Configuración'},
@@ -866,7 +871,7 @@ function load() {
   try {
     const s = localStorage.getItem(STORE_KEY);
     if(s) { const d = JSON.parse(s); acts = d.acts || []; nextId = d.nextId || 1; }
-    else { acts = SEED.map(a=>({...a})); nextId = 87; save(); }
+    else { acts = SEED.map(a=>({...a})); nextId = 92; save(); }
   } catch(e) { acts = SEED.map(a=>({...a})); nextId = 62; }
 }
 
