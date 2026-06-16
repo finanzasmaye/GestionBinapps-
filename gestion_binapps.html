@@ -809,7 +809,7 @@ const SEED = [
   {id:38,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-26',desc:'Crear los productos en ambos módulos: CRM y Desk.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Zoho CRM + Desk'},
   {id:39,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-26',desc:'[Edwin] Preguntar si es necesario el valor unitario en los productos.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Edwin'},
   {id:40,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-26',desc:'[Edwin] Preguntar qué otros campos requieren para dar soporte al cliente.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Edwin'},
-  {id:41,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-26',desc:'Importar los 270 clientes a Zoho CRM (omitir 3 duplicados en amarillo).',resultado:'',estado:'Pendiente',prioridad:'Lista',herramienta:'Zoho CRM'},
+  {id:41,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-06-16',desc:'Importar los 270 clientes a Zoho CRM (omitir 3 duplicados en amarillo).',resultado:'',estado:'En proceso',prioridad:'',herramienta:'Zoho CRM'},
   {id:42,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-26',desc:'[Edwin] Validar lista de clientes con soporte activo. Solo aparecen 23 — verificar si están todos.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Zoho'},
   {id:43,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-26',desc:'Crear pólizas de soporte a los clientes que tienen este servicio contratado.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Zoho CRM'},
   {id:44,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-26',desc:'Revisar con el área comercial el formato de cliente en el CRM.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Área comercial + Edwin'},
@@ -860,6 +860,7 @@ const SEED = [
   {id:96,area:'4. COSTEO DE PROYECTOS',fecha:'2026-06-11',desc:'Estructurar los costos administrativos de funcionamiento: arriendo, servicios públicos, papelería y demás gastos fijos de operación de la empresa.',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'BNET ERP — Plan de cuentas'},
   {id:97,area:'2. SEGUIMIENTO MENSUAL CONTABILIDAD',fecha:'2026-06-11',desc:'Conciliación de la tarjeta corporativa Clara con la auxiliar contable: revisión de movimientos, validación de soportes y cruce contra el auxiliar contable.',resultado:'Conciliación tarjeta Clara realizada',estado:'Completado',prioridad:'',herramienta:'BNET ERP — Tarjeta Clara'},
   {id:98,area:'2. SEGUIMIENTO MENSUAL CONTABILIDAD',fecha:'2026-06-11',desc:'Revisar cuentas por cobrar de los socios de Binapps: depurar saldos, identificar qué es real y qué no, y dejar los saldos correctamente soportados.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'BNET ERP'},
+  {id:99,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-06-16',desc:'Carga de clientes de Binapps a Zoho CRM: importación de los 270 clientes identificados desde el ERP hacia el CRM usando la hoja CLIENTES_ZOHO_IMPORT.',resultado:'',estado:'En proceso',prioridad:'',herramienta:'Zoho CRM'},
   {id:79,area:'3. VALORACIÓN DE EMPRESAS',fecha:'2026-05-28',desc:'Investigar múltiplos de empresas comparables para la valoración por comparables: Siigo, Alegra, Aspel y otros ERP Pyme Latam (EV/EBITDA, P/E).',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Claude.ai + fuentes sectoriales'},
   {id:62,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-27',desc:'[Edwin] Agregar campo NIT y campo Rol/Cargo del contacto en el formato de cliente del CRM. Identificar quién es el contacto y qué posición ocupa dentro de la empresa.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Zoho CRM'},
   {id:63,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-27',desc:'Revisar por qué el usuario de ventas no puede ver todos los contactos disponibles en Zoho. Identificar el problema de permisos o visibilidad.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Zoho CRM — Configuración'},
@@ -878,7 +879,7 @@ function load() {
   try {
     const s = localStorage.getItem(STORE_KEY);
     if(s) { const d = JSON.parse(s); acts = d.acts || []; nextId = d.nextId || 1; }
-    else { acts = SEED.map(a=>({...a})); nextId = 99; save(); }
+    else { acts = SEED.map(a=>({...a})); nextId = 100; save(); }
   } catch(e) { acts = SEED.map(a=>({...a})); nextId = 62; }
 }
 
