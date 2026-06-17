@@ -865,6 +865,8 @@ const SEED = [
   {id:101,area:'4. COSTEO DE PROYECTOS',fecha:'2026-06-16',desc:'Revisión de diferencias entre Power BI (documentos emitidos) y SQL de la empresa para EDOCUMENTS: cruce de datos para validar consistencia entre las dos fuentes.',resultado:'Diferencias identificadas entre Power BI y SQL',estado:'Completado',prioridad:'',herramienta:'Power BI + SQL Server'},
   {id:102,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-06-16',desc:'Organización del Excel de clientes de Binapps para Zoho CRM: ajuste final del archivo y carga exitosa de los 270 clientes al CRM.',resultado:'270 clientes cargados exitosamente en Zoho CRM',estado:'Completado',prioridad:'',herramienta:'Zoho CRM + Excel'},
   {id:103,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-06-16',desc:'Organización de la estructura de costos de Binapps: revisión del plan de cuentas, definición del modelo de ingresos y alineación de la estructura contable con el modelo de negocio.',resultado:'Estructura de costos, plan de cuentas y modelo de ingresos organizados',estado:'Completado',prioridad:'',herramienta:'BNET ERP + Excel'},
+  {id:104,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-06-17',desc:'Revisión de productos contratados por cada cliente de Binapps y carga de esta información a Zoho CRM: identificación de qué productos tiene cada cliente y actualización del CRM.',resultado:'',estado:'En proceso',prioridad:'',herramienta:'Zoho CRM + BNET ERP'},
+  {id:105,area:'5. CONTROL DE INFRAESTRUCTURA',fecha:'2026-06-17',desc:'Seguimiento al consumo diario de Azure: revisión de gasto del día, comparación con días anteriores y verificación de alertas de presupuesto.',resultado:'',estado:'En proceso',prioridad:'',herramienta:'Azure Cost Management'},
   {id:79,area:'3. VALORACIÓN DE EMPRESAS',fecha:'2026-05-28',desc:'Investigar múltiplos de empresas comparables para la valoración por comparables: Siigo, Alegra, Aspel y otros ERP Pyme Latam (EV/EBITDA, P/E).',resultado:'',estado:'Pendiente',prioridad:'Media',herramienta:'Claude.ai + fuentes sectoriales'},
   {id:62,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-27',desc:'[Edwin] Agregar campo NIT y campo Rol/Cargo del contacto en el formato de cliente del CRM. Identificar quién es el contacto y qué posición ocupa dentro de la empresa.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Edwin — Zoho CRM'},
   {id:63,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-27',desc:'Revisar por qué el usuario de ventas no puede ver todos los contactos disponibles en Zoho. Identificar el problema de permisos o visibilidad.',resultado:'',estado:'Pendiente',prioridad:'Alta',herramienta:'Zoho CRM — Configuración'},
@@ -883,7 +885,7 @@ function load() {
   try {
     const s = localStorage.getItem(STORE_KEY);
     if(s) { const d = JSON.parse(s); acts = d.acts || []; nextId = d.nextId || 1; }
-    else { acts = SEED.map(a=>({...a})); nextId = 104; save(); }
+    else { acts = SEED.map(a=>({...a})); nextId = 106; save(); }
   } catch(e) { acts = SEED.map(a=>({...a})); nextId = 62; }
 }
 
