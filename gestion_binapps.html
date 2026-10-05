@@ -495,6 +495,9 @@
   .kpi-click:hover { border-color: var(--blue-border); box-shadow: var(--shadow-md); }
   .kpi-click.sel { border: 2px solid currentColor; box-shadow: var(--shadow-md); }
   .kpi-click.sel.green { border-color: var(--green); } .kpi-click.sel.amber { border-color: var(--amber); } .kpi-click.sel.red { border-color: var(--red); }
+  .area-row { grid-template-columns: 26px 20px 1fr 92px auto; }
+  .area-row .num { color: var(--text-soft); font-size: 12px; text-align: right; }
+  .area-row .when { text-align: right; }
   .area-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
   .area-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 99px; padding: 4px 10px; color: var(--text-muted); }
 
@@ -515,6 +518,9 @@
     .form-grid { grid-template-columns: 1fr; }
     .week-row { grid-template-columns: 70px 20px 1fr; }
     .week-row .who { grid-column: 3; }
+    .area-row { grid-template-columns: 22px 20px 1fr; }
+    .area-row .when { grid-column: 3; text-align: left; }
+    .area-row > button { grid-column: 3; justify-self: start; }
   }
 </style>
 </head>
@@ -609,6 +615,7 @@
           <div class="seg">
             <button id="plan-v-mes" onclick="setPlanVista('mes')">Mes</button>
             <button id="plan-v-semana" onclick="setPlanVista('semana')">Semana</button>
+            <button id="plan-v-area" onclick="setPlanVista('area')">Por área</button>
           </div>
           <button class="nav-arrow" onclick="movePlan(-1)" title="Anterior">‹</button>
           <div class="plan-periodo" id="plan-periodo"></div>
@@ -1014,10 +1021,14 @@ const SEED = [
 // ── PLAN DE TRABAJO (octubre 2026) ──────────────────────────────────────────
 // Se agrega una sola vez a lo que ya está guardado en el navegador (PLAN_VER). `dia` = día en el plan,
 // `con` = con quién. Las fechas son una propuesta: cada tarea se mueve con ‹ día / día › o se edita.
-const A_COST = '1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES', A_CONT = '2. SEGUIMIENTO MENSUAL CONTABILIDAD',
-  A_CART = '6. CARTERA, COBROS Y RENOVACIONES', A_TAB = '7. TABLERO Y PLANEACIÓN FINANCIERA',
-  A_AUTO = '8. AUTOMATIZACIÓN DE PROCESOS', A_DEV = '9. DESARROLLO Y SOPORTE';
-const PLAN_VER = 2;
+// Áreas del plan de octubre, en el orden de la lista acordada el 5-oct-2026.
+const A_COBRO = '6. COBROS Y CARTERA', A_CIERRE = '7. CONTABILIDAD Y CIERRE', A_FIN = '8. FINANZAS Y TABLERO',
+  A_COM = '9. COMERCIAL Y RENOVACIONES', A_DEV = '10. DESARROLLO Y SOPORTE', A_ADM = '11. ADMINISTRATIVO Y PLATAFORMA';
+const AREAS_PLAN = [A_COBRO, A_CIERRE, A_FIN, A_COM, A_DEV, A_ADM];
+// Nombres de la primera versión (5-oct, mañana): lo que se haya creado con ellos pasa al área nueva.
+const AREA_ANTES = { '6. CARTERA, COBROS Y RENOVACIONES': A_COBRO, '7. TABLERO Y PLANEACIÓN FINANCIERA': A_FIN,
+  '8. AUTOMATIZACIÓN DE PROCESOS': A_COM, '9. DESARROLLO Y SOPORTE': A_DEV };
+const PLAN_VER = 3;
 // Nombres que son la misma persona (5-oct-2026): al escribir "Luisa" o "Cris" en "Con quién" se guarda el
 // nombre completo. "Socios" no es una persona con quien se gestiona: esa tarea es solo de la dueña.
 const ALIAS_PERSONA = { 'luisa': 'Luisa Villa', 'auxiliar contable': 'Luisa Villa', 'auxiliar': 'Luisa Villa',
@@ -1030,50 +1041,52 @@ function normalizarCon(s) {
   return out.join('').replace(/\s*,\s*/g, ', ').replace(/^(\s*(,|y|o)\s+)+|(\s+(y|o)\s*|,\s*)+$/g, '').trim();
 }
 const PLAN_SEED = [
-  // Semana 1 · 5–9 oct: cobros urgentes y cierre de septiembre
-  [201, A_CONT, '2026-10-05', 'Revisar los gastos que quedaron para octubre', '', 'Alta'],
-  [202, A_TAB,  '2026-10-05', 'Ajustes al tablero financiero (flujo de caja proyectado)', '', 'Alta', 'En proceso'],
-  [203, A_CART, '2026-10-05', 'Revisar el cobro de Dispropan', 'Cristian (comercial)', 'Alta'],
-  [204, A_CONT, '2026-10-06', 'Cierre de mes (septiembre) con la auxiliar contable', 'Luisa Villa', 'Alta'],
-  [205, A_CONT, '2026-10-06', 'Cambiar las cuentas de los DSE con IVA', 'Luisa Villa', 'Alta'],
-  [206, A_CART, '2026-10-07', 'Cobro de Distrilevas (señora Mariela)', 'Néstor y Luisa Villa', 'Alta'],
-  [207, A_CART, '2026-10-07', 'Revisar las cuentas por cobrar', 'Luisa Villa', 'Alta'],
-  [208, A_CONT, '2026-10-07', 'Revisar la contabilización de las cuentas por cobrar (los 100 millones)', '', 'Alta'],
-  [209, A_CONT, '2026-10-08', 'Revisar la devolución de licencias de Kaskey', 'Luisa Villa y Luis', 'Media'],
-  [210, A_CART, '2026-10-08', 'Cobrar los viáticos de El Tigre', 'Cristian (comercial)', 'Alta'],
-  [211, A_CART, '2026-10-08', 'Cobro de viáticos (los demás pendientes)', '', 'Media'],
-  [212, A_TAB,  '2026-10-09', 'Revisión del flujo de caja libre', 'Néstor', 'Media'],
+  // Cobros y cartera
+  [203, A_COBRO, '2026-10-05', 'Revisar el cobro de Dispropan', 'Cristian (comercial)', 'Alta'],
+  [206, A_COBRO, '2026-10-07', 'Cobro de Distrilevas (señora Mariela)', 'Néstor y Luisa Villa', 'Alta'],
+  [207, A_COBRO, '2026-10-07', 'Revisar las cuentas por cobrar', 'Luisa Villa', 'Alta'],
+  [208, A_COBRO, '2026-10-07', 'Revisar la contabilización de las cuentas por cobrar (los 100 millones)', '', 'Alta'],
+  [210, A_COBRO, '2026-10-08', 'Cobrar los viáticos de El Tigre', 'Cristian (comercial)', 'Alta'],
+  [211, A_COBRO, '2026-10-08', 'Cobro de viáticos (los demás pendientes)', '', 'Media'],
+  // Contabilidad y cierre
+  [201, A_CIERRE, '2026-10-05', 'Revisar los gastos que quedaron para octubre', '', 'Alta'],
+  [204, A_CIERRE, '2026-10-06', 'Cierre de mes (septiembre) con la auxiliar contable', 'Luisa Villa', 'Alta'],
+  [205, A_CIERRE, '2026-10-06', 'Cambiar las cuentas de los DSE con IVA', 'Luisa Villa', 'Alta'],
+  [209, A_CIERRE, '2026-10-08', 'Revisar la devolución de licencias de Kaskey', 'Luisa Villa y Luis', 'Media'],
+  [216, A_CIERRE, '2026-10-13', 'Pasar ventas al centro de costo Implementación', '', 'Media'],
+  [217, A_CIERRE, '2026-10-13', 'Asignar a soporte ingresos por el 15 % del alquiler de BNET', '', 'Media'],
+  // Finanzas y tablero
+  [202, A_FIN,  '2026-10-05', 'Ajustes al tablero financiero (flujo de caja proyectado)', '', 'Alta', 'En proceso'],
+  [212, A_FIN,  '2026-10-09', 'Revisión del flujo de caja libre', 'Néstor', 'Media'],
+  [214, A_FIN,  '2026-10-09', 'Reporte de facturación recurrente', 'Darío o Néstor', 'Media'],
+  [215, A_FIN, '2026-10-13', 'Revisar el despliegue de la estructura de ingresos', 'Néstor', 'Alta'],
+  [218, A_FIN, '2026-10-14', 'Determinar el costo de la hora de soporte y de desarrollo', '', 'Alta'],
+  [219, A_FIN, '2026-10-14', 'Revisar el plan para cobrar las horas de desarrollo', '', 'Media'],
+  [224, A_FIN,  '2026-10-16', 'Pasar la sección de Clientes a Ventas en el tablero (HTML)', '', 'Media'],
+  [235, A_FIN,  '2026-10-27', 'Revisar los presupuestos para el cierre del año', '', 'Alta'],
+  [236, A_FIN,  '2026-10-28', 'Planear la reunión financiera con los socios', '', 'Alta'],
+  // Comercial y renovaciones
+  [223, A_COM, '2026-10-16', 'Revisar el aumento de Agrovar en la renovación pendiente (noviembre o diciembre)', '', 'Media'],
+  [225, A_COM, '2026-10-19', 'Revisar el proceso de automatización de cartera', '', 'Media'],
+  [226, A_COM, '2026-10-19', 'Revisar el proceso comercial para automatizarlo', '', 'Media'],
+  [227, A_COM, '2026-10-20', 'Revisar la automatización de renovaciones de pólizas', '', 'Media'],
+  [228, A_COM, '2026-10-20', 'Automatización de firmas y certificados digitales', '', 'Media'],
+  [229, A_COM, '2026-10-21', 'Capacitación para asignar el producto a las cotizaciones vía SQL', '', 'Media'],
+  [230, A_COM, '2026-10-21', 'Crear el embudo de ventas con automatizaciones', '', 'Media'],
+  // Desarrollo y soporte
   [213, A_DEV,  '2026-10-09', 'Revisar los tickets escalados de soporte', 'Néstor', 'Alta'],
-  [214, A_TAB,  '2026-10-09', 'Reporte de facturación recurrente', 'Darío o Néstor', 'Media'],
-  // Semana 2 · 13–16 oct (el 12 es festivo): estructura de ingresos y costos, desarrollo
-  [215, A_COST, '2026-10-13', 'Revisar el despliegue de la estructura de ingresos', 'Néstor', 'Alta'],
-  [216, A_COST, '2026-10-13', 'Pasar ventas al centro de costo Implementación', '', 'Media'],
-  [217, A_COST, '2026-10-13', 'Asignar a soporte ingresos por el 15 % del alquiler de BNET', '', 'Media'],
-  [218, A_COST, '2026-10-14', 'Determinar el costo de la hora de soporte y de desarrollo', '', 'Alta'],
-  [219, A_COST, '2026-10-14', 'Revisar el plan para cobrar las horas de desarrollo', '', 'Media'],
   [220, A_DEV,  '2026-10-15', 'Reunión para el proyecto de Central', 'Johan', 'Alta'],
   [221, A_DEV,  '2026-10-15', 'Asignar tiempos en los tickets y que el campo sea obligatorio', 'Johan', 'Alta'],
   [222, A_DEV,  '2026-10-15', 'Socializar el tablero de desarrollo', '', 'Media'],
-  [223, A_CART, '2026-10-16', 'Revisar el aumento de Agrovar en la renovación pendiente (noviembre o diciembre)', '', 'Media'],
-  [224, A_TAB,  '2026-10-16', 'Pasar la sección de Clientes a Ventas en el tablero (HTML)', '', 'Media'],
-  // Semana 3 · 19–23 oct: automatizaciones
-  [225, A_AUTO, '2026-10-19', 'Revisar el proceso de automatización de cartera', '', 'Media'],
-  [226, A_AUTO, '2026-10-19', 'Revisar el proceso comercial para automatizarlo', '', 'Media'],
-  [227, A_AUTO, '2026-10-20', 'Revisar la automatización de renovaciones de pólizas', '', 'Media'],
-  [228, A_AUTO, '2026-10-20', 'Automatización de firmas y certificados digitales', '', 'Media'],
-  [229, A_AUTO, '2026-10-21', 'Capacitación para asignar el producto a las cotizaciones vía SQL', '', 'Media'],
-  [230, A_AUTO, '2026-10-21', 'Crear el embudo de ventas con automatizaciones', '', 'Media'],
-  [231, A_AUTO, '2026-10-22', 'Conectar el WhatsApp comercial y el administrativo a la plataforma Imagina', '', 'Media'],
-  [232, A_COST, '2026-10-22', 'Revisar el plan de costos con Imagina la Web', '', 'Media'],
-  [233, A_AUTO, '2026-10-23', 'Organizar bien la estructura del Drive', 'Luisa Villa', 'Normal'],
-  // Semana 4 · 26–30 oct: contratos, presupuesto y socios
-  [234, A_AUTO, '2026-10-26', 'Automatización de los contratos con clientes y empleados', '', 'Media'],
-  [235, A_TAB,  '2026-10-27', 'Revisar los presupuestos para el cierre del año', '', 'Alta'],
-  [236, A_TAB,  '2026-10-28', 'Planear la reunión financiera con los socios', '', 'Alta'],
+  // Administrativo y plataforma
+  [231, A_ADM, '2026-10-22', 'Conectar el WhatsApp comercial y el administrativo a la plataforma Imagina', '', 'Media'],
+  [232, A_ADM, '2026-10-22', 'Revisar el plan de costos con Imagina la Web', '', 'Media'],
+  [233, A_ADM, '2026-10-23', 'Organizar bien la estructura del Drive', 'Luisa Villa', 'Normal'],
+  [234, A_ADM, '2026-10-26', 'Automatización de los contratos con clientes y empleados', '', 'Media'],
 ].map(([id, area, dia, desc, con, prioridad, estado]) => ({ id, area, fecha: '2026-10-05', desc, resultado: '', estado: estado || 'Pendiente',
   prioridad: estado === 'Completado' ? '' : prioridad, herramienta: '', dia, con }));
 
-let AREAS = ['1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES','2. SEGUIMIENTO MENSUAL CONTABILIDAD','3. VALORACIÓN DE EMPRESAS','4. COSTEO DE PROYECTOS','5. CONTROL DE INFRAESTRUCTURA', A_CART, A_TAB, A_AUTO, A_DEV];
+let AREAS = ['1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES','2. SEGUIMIENTO MENSUAL CONTABILIDAD','3. VALORACIÓN DE EMPRESAS','4. COSTEO DE PROYECTOS','5. CONTROL DE INFRAESTRUCTURA', ...AREAS_PLAN];
 const STORE_KEY = 'binapps_gestion_v2';
 let planVer = 0;
 
@@ -1090,6 +1103,9 @@ function load() {
     const ids = new Set(acts.map(a=>a.id));
     PLAN_SEED.forEach(a=>{ if(!ids.has(a.id)) acts.push({...a}); });
     acts.forEach(a=>{ if(a.con) a.con = normalizarCon(a.con); });   // v2: Luisa = Luisa Villa, Cris = Cristian…
+    // v3: las tareas del plan pasan a las 6 áreas de la lista; lo creado con las áreas de la v1, a su equivalente.
+    const areaSeed = Object.fromEntries(PLAN_SEED.map(a=>[a.id, a.area]));
+    acts.forEach(a=>{ if(areaSeed[a.id]) a.area = areaSeed[a.id]; else if(AREA_ANTES[a.area]) a.area = AREA_ANTES[a.area]; });
     planVer = PLAN_VER;
   }
   nextId = Math.max(nextId, ...acts.map(a=>a.id+1));
@@ -1338,11 +1354,15 @@ const AREA_COLORS = {
   '3. VALORACIÓN DE EMPRESAS': '#0e7490',
   '4. COSTEO DE PROYECTOS': '#db2777',
   '5. CONTROL DE INFRAESTRUCTURA': '#d97706',
-  [A_CART]: '#dc2626',
-  [A_TAB]: '#7c3aed',
-  [A_AUTO]: '#0891b2',
+  [A_COBRO]: '#dc2626',
+  [A_CIERRE]: '#16a34a',
+  [A_FIN]: '#7c3aed',
+  [A_COM]: '#0891b2',
   [A_DEV]: '#65a30d',
+  [A_ADM]: '#ea580c',
 };
+// "6. COBROS Y CARTERA" → "Cobros y cartera" (títulos de la vista por área).
+const tituloArea = a => { const s = String(a).replace(/^\d+\.\s*/, '').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); };
 
 // ── PLAN DE TRABAJO ──────────────────────────────────────────────────────────
 // Mes = resumen por semanas; Semana = lunes a viernes con lo de cada día. Las tareas del plan son
@@ -1434,6 +1454,7 @@ function taskHTML(a, tools=true) {
 function renderPlan() {
   document.getElementById('plan-v-mes').classList.toggle('active', PLAN.vista==='mes');
   document.getElementById('plan-v-semana').classList.toggle('active', PLAN.vista==='semana');
+  document.getElementById('plan-v-area').classList.toggle('active', PLAN.vista==='area');
   const P = PLAN.persona, base = acts.filter(a=>conPersona(a, P));
   const sel = document.getElementById('plan-persona');
   sel.innerHTML = `<option value="">👥 Todas las personas</option>` + personas().map(({p, n})=>
@@ -1487,10 +1508,37 @@ function renderPlan() {
     return;
   }
 
-  // Vista mensual: resumen y semanas del mes.
+  // Vista mensual y por área: las tareas del mes.
   const d0 = parseISO(PLAN.ref), y = d0.getFullYear(), m = d0.getMonth();
   const ini = iso(new Date(y, m, 1)), fin = iso(new Date(y, m+1, 0));
   const delMes = base.filter(a=>a.dia && a.dia>=ini && a.dia<=fin);
+
+  if(PLAN.vista==='area') {
+    // Una lista por área, numerada de corrido (como el plan acordado): qué hay que hacer en cada frente.
+    const hechasA = delMes.filter(a=>a.estado==='Completado').length;
+    document.getElementById('plan-periodo').textContent = `${MESES[m][0].toUpperCase()+MESES[m].slice(1)} ${y}`;
+    document.getElementById('plan-sub').textContent = `${delMes.length} tarea${delMes.length!==1?'s':''} en ${new Set(delMes.map(a=>a.area)).size} áreas · ${hechasA} hecha${hechasA!==1?'s':''}`;
+    let n = 0;
+    const grupos = AREAS.map(ar=>({ ar, L: delMes.filter(a=>a.area===ar).sort((a,b)=>a.dia.localeCompare(b.dia) || ordenTareas(a,b)) })).filter(g=>g.L.length);
+    document.getElementById('plan-body').innerHTML = cardPersona + avisoVenc + (grupos.map(({ar, L})=>{
+      const h = L.filter(a=>a.estado==='Completado').length, color = AREA_COLORS[ar] || '#6b7280';
+      return `<div class="week-card" style="border-left:4px solid ${color}">
+        <div class="week-card-head" style="cursor:default">
+          <div><div class="week-card-title" style="color:${color}">${esc(tituloArea(ar))}</div>
+            <div class="task-meta">${L.length} tarea${L.length!==1?'s':''} · ${h} hecha${h!==1?'s':''}</div></div>
+          <div style="width:120px"><div class="prog-bar"><div class="prog-fill ${h===L.length?'full':''}" style="width:${Math.round(h/L.length*100)}%"></div></div></div>
+        </div>
+        ${L.map(a=>{ n++; return `<div class="week-row area-row ${a.estado==='Completado'?'done':''} ${vencida(a)?'vencida':''}">
+          <span class="num">${n}.</span>
+          <div class="act-check ${a.estado==='Completado'?'done':''}" style="width:16px;height:16px" onclick="toggle(${a.id})"></div>
+          <span class="what">${esc(a.desc)}${a.con?`<span class="task-meta" style="display:inline;margin-left:6px">· con ${esc(a.con)}</span>`:''}${a.estado==='En proceso'?' <span class="badge badge-proceso" style="margin:0">⚡ En proceso</span>':''}${etiquetaDuena(a)?` <span class="task-meta" style="display:inline">· ${etiquetaDuena(a)}</span>`:''}</span>
+          <span class="when" title="${a.prioridad?esc(a.prioridad):''}">${diaCorto(a.dia)}${a.prioridad==='Alta'&&a.estado!=='Completado'?' 🔴':''}</span>
+          <button class="nav-arrow" style="padding:2px 8px;font-size:11px" onclick="openEdit(${a.id})">Editar</button>
+        </div>`; }).join('')}
+      </div>`;
+    }).join('') || '<div class="empty">No hay tareas programadas este mes.</div>') + sinProgramar;
+    return;
+  }
   const hechas = delMes.filter(a=>a.estado==='Completado').length, proc = delMes.filter(a=>a.estado==='En proceso').length;
   const vencMes = delMes.filter(vencida).length, pct = delMes.length ? Math.round(hechas/delMes.length*100) : 0;
   document.getElementById('plan-periodo').textContent = `${MESES[m][0].toUpperCase()+MESES[m].slice(1)} ${y}`;
@@ -1809,7 +1857,7 @@ function arrancar() {
   const fc = document.getElementById('f-comp-txt'); if(fc) fc.textContent = textoConjunto();
   // Con #plan, #actividades… en el enlace abre directo esa página (#plan-mes = plan en vista mensual).
   const h = location.hash.slice(1);
-  if(h==='plan-mes') { PLAN.vista = 'mes'; goTo('plan'); }
+  if(h==='plan-mes' || h==='plan-area') { PLAN.vista = h.slice(5); goTo('plan'); }
   else if(['plan','actividades','pendientes','agregar','informe'].includes(h)) goTo(h);
   else goTo('dashboard');
 }
