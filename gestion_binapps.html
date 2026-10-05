@@ -455,11 +455,66 @@
   .modal-close { background: none; border: none; cursor: pointer; color: var(--text-soft); font-size: 20px; line-height: 1; padding: 2px 6px; border-radius: 4px; }
   .modal-close:hover { background: var(--bg); color: var(--text); }
 
+  /* PLAN DE TRABAJO */
+  .plan-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface); }
+  .seg button { border: none; background: transparent; padding: 7px 14px; font-family: inherit; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button.active { background: var(--blue); color: white; }
+  .nav-arrow { border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius-sm); padding: 6px 11px; cursor: pointer; font-family: inherit; font-size: 13px; color: var(--text-muted); }
+  .nav-arrow:hover { border-color: var(--blue-border); color: var(--blue); }
+  .plan-periodo { font-size: 14px; font-weight: 600; min-width: 170px; text-align: center; }
+  .week-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+  .day-col { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 160px; }
+  .day-col.hoy { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-light); }
+  .day-col.festivo { background: var(--bg); }
+  .day-head { padding: 10px 12px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+  .day-name { font-size: 12px; font-weight: 600; text-transform: capitalize; }
+  .day-date { font-size: 11.5px; color: var(--text-soft); }
+  .day-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .day-note { font-size: 11.5px; color: var(--text-soft); text-align: center; padding: 10px 4px; }
+  .task { border: 1px solid var(--border); border-left: 3px solid var(--blue); border-radius: var(--radius-sm); padding: 8px 9px; background: var(--surface); display: flex; gap: 8px; align-items: flex-start; }
+  .task.done { opacity: .6; }
+  .task.vencida { background: var(--red-light); border-color: var(--red-border); }
+  .task .act-check { width: 16px; height: 16px; }
+  .task-desc { font-size: 12.5px; line-height: 1.35; }
+  .task.done .task-desc { text-decoration: line-through; color: var(--text-soft); }
+  .task-meta { font-size: 11px; color: var(--text-soft); margin-top: 3px; }
+  .task-tools { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+  .task-tools button { border: 1px solid var(--border); background: var(--surface); border-radius: 4px; font-size: 11px; padding: 1px 7px; cursor: pointer; color: var(--text-muted); font-family: inherit; white-space: nowrap; }
+  .task-tools button:hover { border-color: var(--blue-border); color: var(--blue); }
+  .week-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 12px; }
+  .week-card-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; }
+  .week-card-title { font-size: 13.5px; font-weight: 600; }
+  .week-row { display: grid; grid-template-columns: 92px 20px 1fr auto; gap: 8px; align-items: start; padding: 6px 0; border-top: 1px solid var(--border-light); font-size: 12.5px; }
+  .week-row .when { color: var(--text-muted); font-size: 12px; text-transform: capitalize; }
+  .week-row.done .what { text-decoration: line-through; color: var(--text-soft); }
+  .week-row.vencida .when { color: var(--red); font-weight: 500; }
+  .link-btn { background: none; border: none; padding: 0; margin-top: 4px; color: var(--blue); cursor: pointer; font-family: inherit; font-size: 12px; }
+  .kpi-click { cursor: pointer; transition: all .15s; }
+  .kpi-click:hover { border-color: var(--blue-border); box-shadow: var(--shadow-md); }
+  .kpi-click.sel { border: 2px solid currentColor; box-shadow: var(--shadow-md); }
+  .kpi-click.sel.green { border-color: var(--green); } .kpi-click.sel.amber { border-color: var(--amber); } .kpi-click.sel.red { border-color: var(--red); }
+  .area-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+  .area-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 99px; padding: 4px 10px; color: var(--text-muted); }
+
+  @media (max-width: 900px) {
+    .week-grid { grid-template-columns: 1fr; }
+  }
+
   @media (max-width: 700px) {
-    .sidebar { display: none; }
+    /* En el celular el menú pasa arriba, en una fila que se desliza. */
+    .app { flex-direction: column; }
+    .sidebar { width: auto; flex-direction: row; padding: 8px 12px; gap: 4px; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+    .sidebar .logo, .sidebar .nav-section { display: none !important; }
+    .nav-btn { width: auto; white-space: nowrap; padding: 7px 10px; }
+    .plan-bar { width: 100%; }
+    .plan-periodo { min-width: 0; flex: 1; }
     .main { padding: 16px; }
     .two-col { grid-template-columns: 1fr; }
     .form-grid { grid-template-columns: 1fr; }
+    .week-row { grid-template-columns: 70px 20px 1fr; }
+    .week-row .who { grid-column: 3; }
   }
 </style>
 </head>
@@ -481,29 +536,34 @@
   </div>
 </div>
 
-    <button class="nav-btn active" onclick="goTo('dashboard')">
+    <button class="nav-btn active" data-tab="dashboard" onclick="goTo('dashboard')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Resumen
     </button>
-    <button class="nav-btn" onclick="goTo('actividades')">
+    <button class="nav-btn" data-tab="plan" onclick="goTo('plan')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Plan de trabajo
+    </button>
+    <button class="nav-btn" data-tab="actividades" onclick="goTo('actividades')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
       Actividades
     </button>
-    <button class="nav-btn" onclick="goTo('pendientes')">
+    <button class="nav-btn" data-tab="pendientes" onclick="goTo('pendientes')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       Pendientes
     </button>
 
     <div class="nav-section">Acciones</div>
 
-    <button class="nav-btn" onclick="goTo('agregar')">
+    <button class="nav-btn" data-tab="agregar" onclick="goTo('agregar')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
       Agregar actividad
     </button>
-    <button class="nav-btn" onclick="goTo('informe')">
+    <button class="nav-btn" data-tab="informe" onclick="goTo('informe')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       Generar informe
     </button>
+    <div id="sesion-box" style="display:none;margin-top:auto;padding:12px 10px 0;border-top:1px solid var(--border-light)"></div>
   </aside>
 
   <!-- MAIN -->
@@ -517,6 +577,7 @@
           <div class="page-sub" id="dash-fecha"></div>
         </div>
       </div>
+      <div id="dash-migrar"></div>
       <div class="kpi-grid" id="kpi-grid"></div>
       <div class="two-col">
         <div class="card">
@@ -528,6 +589,35 @@
           <div class="act-list" id="recent-list"></div>
         </div>
       </div>
+      <div class="card" style="margin-top:20px">
+        <div class="sec-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Plan de hoy</span>
+          <button class="nav-arrow" onclick="PLAN.vista='semana';PLAN.ref=hoyISO();goTo('plan')">Ver la semana →</button>
+        </div>
+        <div id="dash-hoy"></div>
+      </div>
+    </div>
+
+    <!-- PLAN DE TRABAJO -->
+    <div class="page" id="page-plan">
+      <div class="page-header" style="flex-wrap:wrap;gap:12px">
+        <div>
+          <div class="page-title">Plan de trabajo</div>
+          <div class="page-sub" id="plan-sub"></div>
+        </div>
+        <div class="plan-bar">
+          <div class="seg">
+            <button id="plan-v-mes" onclick="setPlanVista('mes')">Mes</button>
+            <button id="plan-v-semana" onclick="setPlanVista('semana')">Semana</button>
+          </div>
+          <button class="nav-arrow" onclick="movePlan(-1)" title="Anterior">‹</button>
+          <div class="plan-periodo" id="plan-periodo"></div>
+          <button class="nav-arrow" onclick="movePlan(1)" title="Siguiente">›</button>
+          <button class="nav-arrow" onclick="PLAN.ref=hoyISO();renderPlan()">Hoy</button>
+          <select id="plan-persona" onchange="setPersona(this.value)" class="nav-arrow" style="max-width:190px" title="Ver solo lo que tengo con una persona"></select>
+        </div>
+      </div>
+      <div id="plan-body"></div>
     </div>
 
     <!-- ACTIVIDADES -->
@@ -637,6 +727,21 @@
             <input type="text" id="f-her" placeholder="ej. Zoho Desk, Edwin, BNET ERP...">
           </div>
         </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Día en el plan de trabajo (opcional)</label>
+            <input type="date" id="f-dia">
+          </div>
+          <div class="form-group">
+            <label>Con quién</label>
+            <input type="text" id="f-con" placeholder="ej. Néstor, Luisa Villa, Cristian...">
+          </div>
+        </div>
+        <div class="form-grid full solo-remoto">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="f-comp"> <span id="f-comp-txt">En conjunto</span>
+          </label>
+        </div>
         <div style="display:flex;gap:10px;margin-top:6px">
           <button class="btn btn-primary" onclick="addAct()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -700,6 +805,21 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ENTRADA (solo con la hoja compartida) -->
+<div class="modal-overlay" id="login-overlay">
+  <div class="modal" style="width:min(380px,92vw)">
+    <div class="modal-header"><div class="modal-title">Entrar al plan compartido</div></div>
+    <div class="form-grid full">
+      <div class="form-group"><label>Tu nombre</label><input type="text" id="login-nombre" autocomplete="username"></div>
+    </div>
+    <div class="form-grid full">
+      <div class="form-group"><label>PIN</label><input type="password" id="login-pin" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()"></div>
+    </div>
+    <div id="login-err" style="font-size:12.5px;color:var(--red);min-height:18px;margin-bottom:10px"></div>
+    <button class="btn btn-primary" onclick="entrar()">Entrar</button>
+  </div>
+</div>
+
 <!-- EDIT MODAL -->
 <div class="modal-overlay" id="edit-modal" onclick="closeModal(event)">
   <div class="modal">
@@ -757,6 +877,21 @@
         <label>Herramienta / responsable</label>
         <input type="text" id="e-her">
       </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Día en el plan de trabajo</label>
+        <input type="date" id="e-dia">
+      </div>
+      <div class="form-group">
+        <label>Con quién</label>
+        <input type="text" id="e-con">
+      </div>
+    </div>
+    <div class="form-grid full solo-remoto">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="e-comp"> <span id="e-comp-txt">En conjunto</span>
+      </label>
     </div>
     <input type="hidden" id="e-id">
     <div style="display:flex;gap:10px;margin-top:6px">
@@ -876,21 +1011,203 @@ const SEED = [
   {id:67,area:'1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES',fecha:'2026-05-27',desc:'Revisión de productos de Binapps y configuración de modelos de contabilización: parametrización de cuentas de ingreso, costo y gasto por línea de producto.',resultado:'',estado:'En proceso',prioridad:'',herramienta:'BNET ERP'},
 ];
 
-let AREAS = ['1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES','2. SEGUIMIENTO MENSUAL CONTABILIDAD','3. VALORACIÓN DE EMPRESAS','4. COSTEO DE PROYECTOS','5. CONTROL DE INFRAESTRUCTURA'];
+// ── PLAN DE TRABAJO (octubre 2026) ──────────────────────────────────────────
+// Se agrega una sola vez a lo que ya está guardado en el navegador (PLAN_VER). `dia` = día en el plan,
+// `con` = con quién. Las fechas son una propuesta: cada tarea se mueve con ‹ día / día › o se edita.
+const A_COST = '1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES', A_CONT = '2. SEGUIMIENTO MENSUAL CONTABILIDAD',
+  A_CART = '6. CARTERA, COBROS Y RENOVACIONES', A_TAB = '7. TABLERO Y PLANEACIÓN FINANCIERA',
+  A_AUTO = '8. AUTOMATIZACIÓN DE PROCESOS', A_DEV = '9. DESARROLLO Y SOPORTE';
+const PLAN_VER = 2;
+// Nombres que son la misma persona (5-oct-2026): al escribir "Luisa" o "Cris" en "Con quién" se guarda el
+// nombre completo. "Socios" no es una persona con quien se gestiona: esa tarea es solo de la dueña.
+const ALIAS_PERSONA = { 'luisa': 'Luisa Villa', 'auxiliar contable': 'Luisa Villa', 'auxiliar': 'Luisa Villa',
+  'cris': 'Cristian (comercial)', 'cristian': 'Cristian (comercial)', 'socios': '' };
+function normalizarCon(s) {
+  if(!s) return s || '';
+  const partes = String(s).split(/(,|\s+y\s+|\s+o\s+)/);
+  const out = partes.map((p, i)=> i % 2 ? p : (k=>k in ALIAS_PERSONA ? ALIAS_PERSONA[k] : p.trim())(p.trim().toLowerCase()));
+  // Quita separadores que quedaron sueltos ("Néstor y " si se borró a alguien).
+  return out.join('').replace(/\s*,\s*/g, ', ').replace(/^(\s*(,|y|o)\s+)+|(\s+(y|o)\s*|,\s*)+$/g, '').trim();
+}
+const PLAN_SEED = [
+  // Semana 1 · 5–9 oct: cobros urgentes y cierre de septiembre
+  [201, A_CONT, '2026-10-05', 'Revisar los gastos que quedaron para octubre', '', 'Alta'],
+  [202, A_TAB,  '2026-10-05', 'Ajustes al tablero financiero (flujo de caja proyectado)', '', 'Alta', 'En proceso'],
+  [203, A_CART, '2026-10-05', 'Revisar el cobro de Dispropan', 'Cristian (comercial)', 'Alta'],
+  [204, A_CONT, '2026-10-06', 'Cierre de mes (septiembre) con la auxiliar contable', 'Luisa Villa', 'Alta'],
+  [205, A_CONT, '2026-10-06', 'Cambiar las cuentas de los DSE con IVA', 'Luisa Villa', 'Alta'],
+  [206, A_CART, '2026-10-07', 'Cobro de Distrilevas (señora Mariela)', 'Néstor y Luisa Villa', 'Alta'],
+  [207, A_CART, '2026-10-07', 'Revisar las cuentas por cobrar', 'Luisa Villa', 'Alta'],
+  [208, A_CONT, '2026-10-07', 'Revisar la contabilización de las cuentas por cobrar (los 100 millones)', '', 'Alta'],
+  [209, A_CONT, '2026-10-08', 'Revisar la devolución de licencias de Kaskey', 'Luisa Villa y Luis', 'Media'],
+  [210, A_CART, '2026-10-08', 'Cobrar los viáticos de El Tigre', 'Cristian (comercial)', 'Alta'],
+  [211, A_CART, '2026-10-08', 'Cobro de viáticos (los demás pendientes)', '', 'Media'],
+  [212, A_TAB,  '2026-10-09', 'Revisión del flujo de caja libre', 'Néstor', 'Media'],
+  [213, A_DEV,  '2026-10-09', 'Revisar los tickets escalados de soporte', 'Néstor', 'Alta'],
+  [214, A_TAB,  '2026-10-09', 'Reporte de facturación recurrente', 'Darío o Néstor', 'Media'],
+  // Semana 2 · 13–16 oct (el 12 es festivo): estructura de ingresos y costos, desarrollo
+  [215, A_COST, '2026-10-13', 'Revisar el despliegue de la estructura de ingresos', 'Néstor', 'Alta'],
+  [216, A_COST, '2026-10-13', 'Pasar ventas al centro de costo Implementación', '', 'Media'],
+  [217, A_COST, '2026-10-13', 'Asignar a soporte ingresos por el 15 % del alquiler de BNET', '', 'Media'],
+  [218, A_COST, '2026-10-14', 'Determinar el costo de la hora de soporte y de desarrollo', '', 'Alta'],
+  [219, A_COST, '2026-10-14', 'Revisar el plan para cobrar las horas de desarrollo', '', 'Media'],
+  [220, A_DEV,  '2026-10-15', 'Reunión para el proyecto de Central', 'Johan', 'Alta'],
+  [221, A_DEV,  '2026-10-15', 'Asignar tiempos en los tickets y que el campo sea obligatorio', 'Johan', 'Alta'],
+  [222, A_DEV,  '2026-10-15', 'Socializar el tablero de desarrollo', '', 'Media'],
+  [223, A_CART, '2026-10-16', 'Revisar el aumento de Agrovar en la renovación pendiente (noviembre o diciembre)', '', 'Media'],
+  [224, A_TAB,  '2026-10-16', 'Pasar la sección de Clientes a Ventas en el tablero (HTML)', '', 'Media'],
+  // Semana 3 · 19–23 oct: automatizaciones
+  [225, A_AUTO, '2026-10-19', 'Revisar el proceso de automatización de cartera', '', 'Media'],
+  [226, A_AUTO, '2026-10-19', 'Revisar el proceso comercial para automatizarlo', '', 'Media'],
+  [227, A_AUTO, '2026-10-20', 'Revisar la automatización de renovaciones de pólizas', '', 'Media'],
+  [228, A_AUTO, '2026-10-20', 'Automatización de firmas y certificados digitales', '', 'Media'],
+  [229, A_AUTO, '2026-10-21', 'Capacitación para asignar el producto a las cotizaciones vía SQL', '', 'Media'],
+  [230, A_AUTO, '2026-10-21', 'Crear el embudo de ventas con automatizaciones', '', 'Media'],
+  [231, A_AUTO, '2026-10-22', 'Conectar el WhatsApp comercial y el administrativo a la plataforma Imagina', '', 'Media'],
+  [232, A_COST, '2026-10-22', 'Revisar el plan de costos con Imagina la Web', '', 'Media'],
+  [233, A_AUTO, '2026-10-23', 'Organizar bien la estructura del Drive', 'Luisa Villa', 'Normal'],
+  // Semana 4 · 26–30 oct: contratos, presupuesto y socios
+  [234, A_AUTO, '2026-10-26', 'Automatización de los contratos con clientes y empleados', '', 'Media'],
+  [235, A_TAB,  '2026-10-27', 'Revisar los presupuestos para el cierre del año', '', 'Alta'],
+  [236, A_TAB,  '2026-10-28', 'Planear la reunión financiera con los socios', '', 'Alta'],
+].map(([id, area, dia, desc, con, prioridad, estado]) => ({ id, area, fecha: '2026-10-05', desc, resultado: '', estado: estado || 'Pendiente',
+  prioridad: estado === 'Completado' ? '' : prioridad, herramienta: '', dia, con }));
+
+let AREAS = ['1. ESTRUCTURACIÓN DE COSTOS EMPRESARIALES','2. SEGUIMIENTO MENSUAL CONTABILIDAD','3. VALORACIÓN DE EMPRESAS','4. COSTEO DE PROYECTOS','5. CONTROL DE INFRAESTRUCTURA', A_CART, A_TAB, A_AUTO, A_DEV];
 const STORE_KEY = 'binapps_gestion_v2';
+let planVer = 0;
 
 let acts = [], nextId = 1, filterArea = 'todas';
 
 function load() {
   try {
     const s = localStorage.getItem(STORE_KEY);
-    if(s) { const d = JSON.parse(s); acts = d.acts || []; nextId = d.nextId || 1; }
-    else { acts = SEED.map(a=>({...a})); nextId = 106; save(); }
-  } catch(e) { acts = SEED.map(a=>({...a})); nextId = 62; }
+    if(s) { const d = JSON.parse(s); acts = d.acts || []; nextId = d.nextId || 1; planVer = d.planVer || 0; }
+    else { acts = SEED.map(a=>({...a})); nextId = 106; }
+  } catch(e) { acts = SEED.map(a=>({...a})); nextId = 106; }
+  // El plan de trabajo se suma a lo guardado, sin pisar lo que ya exista con el mismo id.
+  if(planVer < PLAN_VER) {
+    const ids = new Set(acts.map(a=>a.id));
+    PLAN_SEED.forEach(a=>{ if(!ids.has(a.id)) acts.push({...a}); });
+    acts.forEach(a=>{ if(a.con) a.con = normalizarCon(a.con); });   // v2: Luisa = Luisa Villa, Cris = Cristian…
+    planVer = PLAN_VER;
+  }
+  nextId = Math.max(nextId, ...acts.map(a=>a.id+1));
+  acts.forEach(a=>{ if(a.area && !AREAS.includes(a.area)) AREAS.push(a.area); });
+  save();
 }
 
 function save() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify({acts, nextId})); } catch(e){}
+  if(REMOTO) { sincronizar(); return; }
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({acts, nextId, planVer})); } catch(e){}
+}
+
+// ── COMPARTIDO (Google Sheets) ───────────────────────────────────────────────
+// Con API_URL el panel guarda en la hoja de Google (ver google-sheets/LEEME.md) y no en este navegador:
+// cada persona entra con nombre + PIN y ve lo suyo + lo marcado "en conjunto" (lo filtra la hoja, no el
+// navegador). Sin API_URL todo sigue como antes, en el navegador.
+const API_URL = '';   // ← pegar aquí la URL de la aplicación web de Apps Script (termina en /exec)
+const REMOTO = !!API_URL;
+const SES_KEY = 'gb_sesion';
+const CAMPOS_HOJA = ['area','fecha','desc','resultado','estado','prioridad','priAnterior','herramienta','dia','con','compartida'];
+let SES = null, YO = '', USUARIOS = [], SNAP = new Map(), guardando = null, otraVez = false;
+try { SES = JSON.parse(localStorage.getItem(SES_KEY) || 'null'); } catch(e) {}
+
+const firma = a => JSON.stringify(CAMPOS_HOJA.map(k=>a[k] ?? ''));
+const nuevoId = () => REMOTO ? Date.now()*10 + Math.floor(Math.random()*10) : nextId++;
+const esMia = a => !REMOTO || !a.duena || a.duena===YO;
+const enConjunto = a => REMOTO && a.compartida==='SI';
+const etiquetaDuena = a => !REMOTO ? '' : [enConjunto(a) ? '🤝 en conjunto' : '', !esMia(a) ? `📌 de ${esc(a.duena)}` : ''].filter(Boolean).join(' · ');
+
+async function api(cuerpo) {
+  // text/plain evita la consulta previa (CORS) que Apps Script no responde.
+  const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ ...cuerpo, usuario: SES && SES.usuario, pin: SES && SES.pin }) });
+  const j = await r.json();
+  if(!j.ok) throw new Error(j.error || 'Error de la hoja');
+  return j;
+}
+function recibir(r) {
+  YO = r.usuario; USUARIOS = r.usuarios || [];
+  acts = (r.acts || []).map(a=>({ ...a, id: Number(a.id) }));
+  SNAP = new Map(acts.map(a=>[String(a.id), firma(a)]));
+  acts.forEach(a=>{ if(a.area && !AREAS.includes(a.area)) AREAS.push(a.area); });
+  pintarSesion();
+}
+const hayCambios = () => acts.some(a=>SNAP.get(String(a.id))!==firma(a)) || SNAP.size!==acts.length;
+function estadoSync(txt, error) {
+  const el = document.getElementById('sync-estado');
+  if(el) { el.textContent = txt; el.style.color = error ? 'var(--red)' : 'var(--text-soft)'; }
+}
+function sincronizar() {
+  if(guardando) { otraVez = true; return; }
+  const cambios = acts.filter(a=>SNAP.get(String(a.id))!==firma(a))
+    .map(a=>Object.fromEntries([['id', String(a.id)], ...CAMPOS_HOJA.map(k=>[k, a[k] ?? ''])]));
+  const vivos = new Set(acts.map(a=>String(a.id)));
+  const borrar = [...SNAP.keys()].filter(id=>!vivos.has(id));
+  if(!cambios.length && !borrar.length) return;
+  estadoSync('Guardando…');
+  guardando = api({ accion: 'guardar', cambios, borrar })
+    .then(()=>{
+      // Lo enviado ya está en la hoja. No se reemplaza la lista: si se cambió algo mientras tanto, se pierde.
+      cambios.forEach(c=>SNAP.set(c.id, firma(c)));
+      borrar.forEach(id=>SNAP.delete(id));
+      estadoSync('Guardado ✓');
+    })
+    .catch(e=>{ estadoSync('⚠ No se guardó', true); toast('⚠ No se guardó en la hoja: ' + e.message); })
+    .finally(()=>{ guardando = null; if(otraVez) { otraVez = false; sincronizar(); } });
+}
+// Trae lo que la otra persona haya cambiado (cada minuto y al volver a la pestaña), si no hay nada por guardar.
+async function refrescar() {
+  if(!REMOTO || !SES || guardando || hayCambios() || document.getElementById('edit-modal').classList.contains('open')) return;
+  try { recibir(await api({ accion: 'listar' })); rerender(); estadoSync('Al día ✓'); }
+  catch(e) { estadoSync('⚠ Sin conexión con la hoja', true); }
+}
+function pintarSesion() {
+  const el = document.getElementById('sesion-box'); if(!el) return;
+  el.style.display = REMOTO ? '' : 'none';
+  if(!REMOTO) return;
+  el.innerHTML = SES && YO ? `<div style="font-size:12.5px;font-weight:500;color:var(--text)">👤 ${esc(YO)}</div>
+    <div id="sync-estado" style="font-size:11px;color:var(--text-soft)">Al día ✓</div>
+    <button class="link-btn" onclick="salir()">Salir</button>` : '';
+}
+function mostrarLogin(msg) {
+  document.getElementById('login-err').textContent = msg || '';
+  document.getElementById('login-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById(SES && SES.usuario ? 'login-pin' : 'login-nombre').focus(), 50);
+}
+async function entrar() {
+  const usuario = document.getElementById('login-nombre').value.trim(), pin = document.getElementById('login-pin').value.trim();
+  if(!usuario || !pin) { document.getElementById('login-err').textContent = 'Escribe tu nombre y tu PIN.'; return; }
+  SES = { usuario, pin };
+  document.getElementById('login-err').textContent = 'Entrando…';
+  try {
+    recibir(await api({ accion: 'listar' }));
+    try { localStorage.setItem(SES_KEY, JSON.stringify(SES)); } catch(e) {}
+    document.getElementById('login-overlay').classList.remove('open');
+    arrancar();
+  } catch(e) { SES = null; document.getElementById('login-err').textContent = e.message; }
+}
+function salir() {
+  try { localStorage.removeItem(SES_KEY); } catch(e) {}
+  SES = null; YO = ''; acts = []; SNAP = new Map(); pintarSesion(); rerender(); mostrarLogin();
+}
+// Las actividades que ya estaban en este navegador (antes de conectar la hoja) se suben una vez, como
+// personales de quien entra; después se marca cuáles son en conjunto.
+function localesSinSubir() {
+  if(!REMOTO || acts.some(a=>a.duena===YO)) return [];
+  try { const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); return (d && d.acts) || []; } catch(e) { return []; }
+}
+function subirLocales() {
+  const L = localesSinSubir(); if(!L.length) return;
+  // Las que dicen "con" una de las otras personas del plan (p. ej. Luisa Villa) ya suben en conjunto.
+  const otras = USUARIOS.filter(u=>u!==YO);
+  const conjunta = a => a.estado!=='Completado' && otras.some(u=>partirCon(a.con).some(x=>sinTildes(x).startsWith(sinTildes(u)) || sinTildes(u).startsWith(sinTildes(x))));
+  const nConj = L.filter(conjunta).length;
+  if(!confirm(`¿Subir tus ${L.length} actividades de este navegador al plan compartido?\n\n${nConj} pendientes con ${otras.join(', ') || 'otras personas'} quedan en conjunto; las demás, personales tuyas.`)) return;
+  const base = Date.now()*10;
+  L.forEach((a, i)=>acts.push({ ...a, id: base + i, duena: YO, compartida: conjunta(a) ? 'SI' : 'NO' }));
+  save(); rerender(); toast(`⬆ ${L.length} actividades subidas · ${nConj} en conjunto`);
 }
 
 function toast(msg) {
@@ -901,15 +1218,50 @@ function toast(msg) {
 
 function goTo(tab) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+tab).classList.add('active');
-  document.querySelectorAll('.nav-btn')[['dashboard','actividades','pendientes','X','agregar','informe'].indexOf(tab)] && 
-    document.querySelectorAll('.nav-btn')[['dashboard','actividades','pendientes','agregar','informe'].indexOf(tab)].classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b=>{ if(b.textContent.trim().toLowerCase().includes(tab.replace('page-',''))) b.classList.add('active'); });
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
   if(tab==='dashboard') renderDash();
+  if(tab==='plan') renderPlan();
   if(tab==='actividades') renderActs();
   if(tab==='pendientes') renderPend();
 }
+
+// Vuelve a dibujar la página que esté abierta (después de marcar, mover o editar).
+function rerender() {
+  const active = document.querySelector('.page.active').id;
+  if(active==='page-actividades') renderActs();
+  if(active==='page-pendientes') renderPend();
+  if(active==='page-dashboard') renderDash();
+  if(active==='page-plan') renderPlan();
+}
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ── FECHAS ───────────────────────────────────────────────────────────────────
+// Festivos de Colombia (Ley Emiliani): el plan no programa en ellos.
+const FESTIVOS = {
+  '2026-10-12':'Día de la Raza','2026-11-02':'Todos los Santos','2026-11-16':'Independencia de Cartagena',
+  '2026-12-08':'Inmaculada Concepción','2026-12-25':'Navidad','2027-01-01':'Año Nuevo','2027-01-11':'Reyes Magos',
+  '2027-03-22':'San José','2027-03-25':'Jueves Santo','2027-03-26':'Viernes Santo','2027-05-01':'Día del Trabajo',
+  '2027-05-10':'Ascensión','2027-05-31':'Corpus Christi','2027-06-07':'Sagrado Corazón','2027-07-05':'San Pedro y San Pablo',
+  '2027-07-20':'Independencia','2027-08-07':'Batalla de Boyacá','2027-08-16':'Asunción','2027-10-18':'Día de la Raza',
+  '2027-11-01':'Todos los Santos','2027-11-15':'Independencia de Cartagena','2027-12-08':'Inmaculada Concepción','2027-12-25':'Navidad',
+};
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const parseISO = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const hoyISO = () => iso(new Date());
+const masDias = (s, n) => { const d = parseISO(s); d.setDate(d.getDate()+n); return iso(d); };
+const lunesDe = s => { const d = parseISO(s); d.setDate(d.getDate() - (d.getDay()+6)%7); return iso(d); };
+const esHabil = s => { const w = parseISO(s).getDay(); return w>0 && w<6 && !FESTIVOS[s]; };
+function moverHabil(s, n) {
+  let d = s, k = Math.abs(n); const paso = n>0 ? 1 : -1;
+  while(k>0) { d = masDias(d, paso); if(esHabil(d)) k--; }
+  return d;
+}
+const diaCorto = s => { const d = parseISO(s); return `${DIAS[d.getDay()].slice(0,3)} ${d.getDate()} ${MESES[d.getMonth()].slice(0,3)}`; };
+const vencida = a => a.dia && a.estado!=='Completado' && a.dia < hoyISO();
 
 function bc(p){return p==='Alta'?'badge-alta':p==='Media'?'badge-media':p==='Lista'?'badge-lista':'badge-normal';}
 function bl(p){return p==='Alta'?'🔴 Alta':p==='Media'?'🟠 Media':p==='Lista'?'✅ Lista':'🟡 Normal';}
@@ -938,6 +1290,14 @@ function renderDash() {
       <div><div style="font-size:12.5px;line-height:1.4">${a.desc.substring(0,75)}${a.desc.length>75?'…':''}</div>
       <div style="font-size:11px;color:var(--text-soft);margin-top:3px">${a.area} · ${a.fecha}</div></div>
     </div>`).join('');
+  const loc = localesSinSubir();
+  document.getElementById('dash-migrar').innerHTML = loc.length ? `<div class="card" style="margin-bottom:16px;border-color:var(--blue-border);background:var(--blue-light);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-size:13px">En este navegador tienes <b>${loc.length}</b> actividades de antes de conectar el plan compartido.</span>
+      <button class="btn btn-primary" onclick="subirLocales()">Subirlas a mi plan</button></div>` : '';
+  const hoy = hoyISO(), deHoy = acts.filter(a=>a.dia===hoy || vencida(a)).sort((a,b)=>(a.dia===hoy)-(b.dia===hoy) || ordenTareas(a,b));
+  document.getElementById('dash-hoy').innerHTML = deHoy.length
+    ? `<div class="act-list">${deHoy.map(a=>taskHTML(a)).join('')}</div>`
+    : '<div class="empty">Nada programado para hoy.</div>';
 }
 
 function actHTML(a, showDel=true) {
@@ -947,13 +1307,13 @@ function actHTML(a, showDel=true) {
     <div class="act-check ${a.estado==='Completado'?'done':''}" onclick="toggle(${a.id})"></div>
     <div class="act-body">
       <div class="act-desc ${a.estado==='Completado'?'done':''}">${a.desc}</div>
-      <div class="act-meta"><span class="badge-area">${a.area}</span>${a.fecha}${a.herramienta?' · '+a.herramienta:''}</div>
+      <div class="act-meta"><span class="badge-area">${a.area}</span>${a.fecha}${a.herramienta?' · '+a.herramienta:''}${a.dia?' · 📅 plan: '+diaCorto(a.dia):''}${a.con?' · 👥 '+esc(a.con):''}${etiquetaDuena(a)?' · '+etiquetaDuena(a):''}</div>
       ${a.resultado?`<div class="act-result">${a.resultado}</div>`:''}
       ${badges}
     </div>
     <div class="act-actions">
     <button class="icon-btn" onclick="openEdit(${a.id})" title="Editar" style="color:var(--text-soft)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:14px;height:14px;stroke-width:1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-    ${showDel?`<button class="icon-btn" onclick="del(${a.id})" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:14px;height:14px;stroke-width:1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`:''}
+    ${showDel && esMia(a)?`<button class="icon-btn" onclick="del(${a.id})" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:14px;height:14px;stroke-width:1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`:''}
   </div>
   </div>`;
 }
@@ -961,7 +1321,7 @@ function actHTML(a, showDel=true) {
 function renderActs() {
   const q = (document.getElementById('search-input')?.value||'').toLowerCase().trim();
   let list = filterArea==='todas' ? acts : acts.filter(a=>a.area===filterArea);
-  if(q) list = list.filter(a=>a.desc.toLowerCase().includes(q)||(a.resultado||'').toLowerCase().includes(q)||(a.herramienta||'').toLowerCase().includes(q));
+  if(q) list = list.filter(a=>a.desc.toLowerCase().includes(q)||(a.resultado||'').toLowerCase().includes(q)||(a.herramienta||'').toLowerCase().includes(q)||(a.con||'').toLowerCase().includes(q));
   document.getElementById('acts-count').textContent = `${list.length} actividades`;
   const sc = document.getElementById('search-count');
   if(sc) sc.textContent = q ? `${list.length} resultado${list.length!==1?'s':''}` : '';
@@ -978,7 +1338,203 @@ const AREA_COLORS = {
   '3. VALORACIÓN DE EMPRESAS': '#0e7490',
   '4. COSTEO DE PROYECTOS': '#db2777',
   '5. CONTROL DE INFRAESTRUCTURA': '#d97706',
+  [A_CART]: '#dc2626',
+  [A_TAB]: '#7c3aed',
+  [A_AUTO]: '#0891b2',
+  [A_DEV]: '#65a30d',
 };
+
+// ── PLAN DE TRABAJO ──────────────────────────────────────────────────────────
+// Mes = resumen por semanas; Semana = lunes a viernes con lo de cada día. Las tareas del plan son
+// actividades con `dia`; marcar, editar y mover las cambia en todas las vistas.
+const PLAN = { vista: 'semana', ref: hoyISO(), persona: '', est: '' };
+// Tarjetas del mes que filtran la lista: clic en Hechas / En proceso / Atrasadas; otra vez (o "Tareas
+// en el mes") vuelve a todas.
+const EST_PLAN = {
+  hechas:    { txt: 'hechas',     f: a=>a.estado==='Completado' },
+  proceso:   { txt: 'en proceso', f: a=>a.estado==='En proceso' },
+  atrasadas: { txt: 'atrasadas',  f: a=>vencida(a) },
+};
+function setEstPlan(e) { PLAN.est = PLAN.est===e ? '' : e; renderPlan(); }
+
+// ── PERSONAS ─────────────────────────────────────────────────────────────────
+// Se sacan del campo "Con quién" ("Néstor y Luisa Villa" → Néstor, Luisa Villa). Elegir "Luisa" trae
+// también "Luisa Villa" y lo que diga Luisa en la herramienta o la descripción ("[Edwin] …").
+const sinTildes = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const partirCon = s => String(s||'').split(/,|\s+y\s+|\s+o\s+|\//).map(x=>x.replace(/\(.*?\)/g,'').trim()).filter(Boolean);
+function personas() {
+  // Con la hoja compartida también cuentan las dueñas (para ver lo que es de la otra persona).
+  // "Nestor" y "Néstor" (o "néstor") son la misma: se agrupan sin tildes ni mayúsculas y se muestra la
+  // forma más usada.
+  const formas = {};
+  acts.flatMap(a=>[...partirCon(a.con), ...(REMOTO && a.duena && a.duena!==YO ? [a.duena] : [])]).forEach(n=>{
+    const k = sinTildes(n); (formas[k] = formas[k] || {})[n] = (formas[k][n] || 0) + 1;
+  });
+  const nombres = Object.values(formas).map(f=>Object.entries(f).sort((a,b)=>b[1]-a[1] || (b[0]!==sinTildes(b[0])) - (a[0]!==sinTildes(a[0])))[0][0])
+    .sort((a,b)=>a.localeCompare(b,'es'));
+  return nombres.map(p=>({ p, n: acts.filter(a=>a.estado!=='Completado' && conPersona(a, p)).length }));
+}
+function conPersona(a, p) {
+  if(!p) return true;
+  const q = sinTildes(p);
+  // "Luisa" trae a "Luisa Villa", pero "Luis" no trae a "Luisa": el nombre tiene que terminar ahí.
+  if(partirCon(a.con).some(x=>{ const s = sinTildes(x); return s===q || s.startsWith(q + ' '); })) return true;
+  if(REMOTO && a.duena && sinTildes(a.duena)===q) return true;
+  const re = new RegExp('(^|[^a-z])' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '($|[^a-z])');
+  return re.test(sinTildes(a.herramienta)) || re.test(sinTildes(a.desc));
+}
+function setPersona(p) { PLAN.persona = p; renderPlan(); }
+const PRI_ORD = ['Alta','Media','Lista','Normal',''];
+const ordenTareas = (a, b) => (a.estado==='Completado') - (b.estado==='Completado')
+  || (b.estado==='En proceso') - (a.estado==='En proceso') || PRI_ORD.indexOf(a.prioridad||'') - PRI_ORD.indexOf(b.prioridad||'');
+
+function setPlanVista(v) { PLAN.vista = v; renderPlan(); }
+function movePlan(n) {
+  if(PLAN.vista==='semana') PLAN.ref = masDias(lunesDe(PLAN.ref), 7*n);
+  else { const d = parseISO(PLAN.ref); PLAN.ref = iso(new Date(d.getFullYear(), d.getMonth()+n, 1)); }
+  renderPlan();
+}
+function moverTarea(id, n) {
+  const a = acts.find(x=>x.id===id); if(!a) return;
+  const base = a.dia && !(n>0 && vencida(a)) ? a.dia : (n>0 ? masDias(hoyISO(), -1) : hoyISO());
+  a.dia = moverHabil(base, n);
+  save(); rerender(); toast(`📅 Pasó al ${diaCorto(a.dia)}`);
+}
+function pasarVencidasAHoy() {
+  const h = esHabil(hoyISO()) ? hoyISO() : moverHabil(hoyISO(), 1);
+  const L = acts.filter(a=>vencida(a) && conPersona(a, PLAN.persona));
+  L.forEach(a=>{ a.dia = h; });
+  save(); rerender(); toast(`📅 ${L.length} tarea${L.length!==1?'s':''} pasada${L.length!==1?'s':''} al ${diaCorto(h)}`);
+}
+function programar(id) {
+  const a = acts.find(x=>x.id===id); if(!a) return;
+  a.dia = esHabil(hoyISO()) ? hoyISO() : moverHabil(hoyISO(), 1);
+  save(); rerender(); toast(`📅 Programada para el ${diaCorto(a.dia)}`);
+}
+
+function taskHTML(a, tools=true) {
+  const color = AREA_COLORS[a.area] || '#6b7280', hecha = a.estado==='Completado';
+  const meta = [etiquetaDuena(a), a.con ? '👥 '+esc(a.con) : '', a.estado==='En proceso' ? '⚡ En proceso' : '',
+    !hecha && a.prioridad ? bl(a.prioridad) : '', vencida(a) ? `⏰ era para el ${diaCorto(a.dia)}` : ''].filter(Boolean).join(' · ');
+  return `<div class="task ${hecha?'done':''} ${vencida(a)?'vencida':''}" style="border-left-color:${color}" title="${esc(a.area)}">
+    <div class="act-check ${hecha?'done':''}" onclick="toggle(${a.id})" title="${hecha?'Marcar pendiente':'Marcar hecha'}"></div>
+    <div style="flex:1;min-width:0">
+      <div class="task-desc">${esc(a.desc)}</div>
+      ${meta?`<div class="task-meta">${meta}</div>`:''}
+      ${tools?`<div class="task-tools">
+        <button onclick="moverTarea(${a.id},-1)" title="Pasar al día hábil anterior">‹</button>
+        <button onclick="moverTarea(${a.id},1)" title="Pasar al siguiente día hábil">›</button>
+        <button onclick="moverTarea(${a.id},5)" title="Pasar a la semana siguiente">+1 sem</button>
+        <button onclick="openEdit(${a.id})" title="Editar (fecha, con quién, estado…)">Editar</button>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+
+function renderPlan() {
+  document.getElementById('plan-v-mes').classList.toggle('active', PLAN.vista==='mes');
+  document.getElementById('plan-v-semana').classList.toggle('active', PLAN.vista==='semana');
+  const P = PLAN.persona, base = acts.filter(a=>conPersona(a, P));
+  const sel = document.getElementById('plan-persona');
+  sel.innerHTML = `<option value="">👥 Todas las personas</option>` + personas().map(({p, n})=>
+    `<option value="${esc(p)}"${p===P?' selected':''}>${esc(p)}${n?` (${n} pendiente${n!==1?'s':''})`:''}</option>`).join('');
+  const hoy = hoyISO(), venc = base.filter(vencida);
+  const sinDia = base.filter(a=>!a.dia && a.estado!=='Completado').sort(ordenTareas);
+  // Con una persona elegida: todo lo pendiente con ella, de cualquier fecha (y sin fecha), arriba.
+  const pendP = P ? base.filter(a=>a.estado!=='Completado').sort((a,b)=>(a.dia||'9999').localeCompare(b.dia||'9999') || ordenTareas(a,b)) : [];
+  const cardPersona = P ? `<div class="card" style="margin-bottom:16px;border-color:var(--blue-border)">
+      <div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <span>Todo lo pendiente con ${esc(P)} · ${pendP.length}</span>
+        <button class="nav-arrow" onclick="setPersona('')">Quitar filtro ✕</button>
+      </div>
+      ${pendP.length ? `<div class="act-list">${pendP.map(a=>`<div style="display:flex;gap:10px;align-items:flex-start">
+          <span class="task-meta" style="min-width:86px;margin-top:9px;${vencida(a)?'color:var(--red);font-weight:500':''}">${a.dia?diaCorto(a.dia):'sin fecha'}</span>
+          <div style="flex:1;min-width:0">${taskHTML(a)}</div></div>`).join('')}</div>`
+        : '<div class="empty">No hay nada pendiente con esta persona.</div>'}
+      <div class="task-meta" style="margin-top:10px">Abajo, ${PLAN.vista==='semana'?'la semana':'el mes'} solo con lo de ${esc(P)}.</div>
+    </div>` : '';
+  const avisoVenc = venc.length ? `<div class="card" style="margin-bottom:14px;border-color:var(--red-border);background:var(--red-light);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="color:var(--red);font-size:13px"><b>${venc.length}</b> tarea${venc.length!==1?'s':''} del plan se ${venc.length!==1?'quedaron':'quedó'} atrás sin terminar.</span>
+      <button class="btn btn-secondary" onclick="pasarVencidasAHoy()">Pasarlas a hoy</button></div>` : '';
+  const sinProgramar = sinDia.length ? `<details class="card" style="margin-top:16px">
+      <summary style="cursor:pointer;font-size:13px;font-weight:600">Pendientes sin día en el plan (${sinDia.length})</summary>
+      <div style="font-size:12px;color:var(--text-soft);margin:8px 0">Actividades pendientes o en proceso que todavía no tienen día. “Programar” las pone hoy; después se mueven con ‹ y ›.</div>
+      <div class="act-list">${sinDia.map(a=>`<div class="week-row" style="grid-template-columns:1fr auto">
+        <div><span class="area-dot" style="display:inline-block;margin-right:6px;background:${AREA_COLORS[a.area]||'#6b7280'}"></span>${esc(a.desc)}
+          <div class="task-meta">${esc(a.area)}${a.prioridad?' · '+bl(a.prioridad):''}</div></div>
+        <button class="nav-arrow" onclick="programar(${a.id})">Programar</button></div>`).join('')}</div>
+    </details>` : '';
+
+  if(PLAN.vista==='semana') {
+    const lun = lunesDe(PLAN.ref), vie = masDias(lun, 4), dom = masDias(lun, 6);
+    const dias = [0,1,2,3,4].map(i=>masDias(lun, i));
+    const deLaSemana = base.filter(a=>a.dia && a.dia>=lun && a.dia<=dom);
+    const hechas = deLaSemana.filter(a=>a.estado==='Completado').length;
+    const l = parseISO(lun), v = parseISO(vie);
+    document.getElementById('plan-periodo').textContent = l.getMonth()===v.getMonth()
+      ? `${l.getDate()} – ${v.getDate()} ${MESES[v.getMonth()].slice(0,3)} ${v.getFullYear()}`
+      : `${l.getDate()} ${MESES[l.getMonth()].slice(0,3)} – ${v.getDate()} ${MESES[v.getMonth()].slice(0,3)} ${v.getFullYear()}`;
+    document.getElementById('plan-sub').textContent = `${deLaSemana.length} tarea${deLaSemana.length!==1?'s':''} esta semana · ${hechas} hecha${hechas!==1?'s':''}`;
+    document.getElementById('plan-body').innerHTML = cardPersona + avisoVenc + `<div class="week-grid">${dias.map((d, i)=>{
+      // Lo que quede en sábado o domingo se muestra el viernes.
+      const L = deLaSemana.filter(a=>a.dia===d || (i===4 && a.dia>vie)).sort(ordenTareas);
+      const fest = FESTIVOS[d];
+      return `<div class="day-col ${d===hoy?'hoy':''} ${fest?'festivo':''}">
+        <div class="day-head"><span class="day-name">${DIAS[parseISO(d).getDay()]}${d===hoy?' · hoy':''}</span><span class="day-date">${parseISO(d).getDate()} ${MESES[parseISO(d).getMonth()].slice(0,3)}</span></div>
+        <div class="day-body">${fest?`<div class="day-note">Festivo · ${fest}</div>`:''}${L.map(a=>taskHTML(a)).join('') || (fest?'':'<div class="day-note">Sin tareas</div>')}</div>
+      </div>`;
+    }).join('')}</div>` + sinProgramar;
+    return;
+  }
+
+  // Vista mensual: resumen y semanas del mes.
+  const d0 = parseISO(PLAN.ref), y = d0.getFullYear(), m = d0.getMonth();
+  const ini = iso(new Date(y, m, 1)), fin = iso(new Date(y, m+1, 0));
+  const delMes = base.filter(a=>a.dia && a.dia>=ini && a.dia<=fin);
+  const hechas = delMes.filter(a=>a.estado==='Completado').length, proc = delMes.filter(a=>a.estado==='En proceso').length;
+  const vencMes = delMes.filter(vencida).length, pct = delMes.length ? Math.round(hechas/delMes.length*100) : 0;
+  document.getElementById('plan-periodo').textContent = `${MESES[m][0].toUpperCase()+MESES[m].slice(1)} ${y}`;
+  document.getElementById('plan-sub').textContent = `${delMes.length} tarea${delMes.length!==1?'s':''} en el mes · ${pct} % hecho`;
+  const porArea = AREAS.map(ar=>({ ar, L: delMes.filter(a=>a.area===ar) })).filter(x=>x.L.length);
+  const semanas = [];
+  for(let l = lunesDe(ini); l <= fin; l = masDias(l, 7)) semanas.push(l);
+  const E = EST_PLAN[PLAN.est], verMes = E ? delMes.filter(E.f) : delMes;
+  const kpiBtn = (est, cls, n, lbl) => `<div class="kpi ${cls} kpi-click ${PLAN.est===est?'sel':''}" onclick="${est?`setEstPlan('${est}')`:`PLAN.est='';renderPlan()`}"
+      title="${est?(PLAN.est===est?'Clic para ver todas':`Ver solo las ${EST_PLAN[est].txt}`):'Ver todas'}"><div class="kpi-num">${n}</div><div class="kpi-lbl">${lbl}</div></div>`;
+  document.getElementById('plan-body').innerHTML = cardPersona + avisoVenc + `
+    <div class="kpi-grid">
+      ${kpiBtn('', 'blue', delMes.length, 'Tareas en el mes')}
+      ${kpiBtn('hechas', 'green', hechas, 'Hechas')}
+      ${kpiBtn('proceso', 'amber', proc, 'En proceso')}
+      ${kpiBtn('atrasadas', 'red', vencMes, 'Atrasadas')}
+    </div>
+    <div class="prog-bar" style="margin:-14px 0 18px"><div class="prog-fill ${pct===100?'full':''}" style="width:${pct}%"></div></div>
+    ${E ? `<div class="card" style="margin-bottom:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-color:var(--blue-border);background:var(--blue-light)">
+      <span style="font-size:13px">Mostrando solo las tareas <b>${E.txt}</b> del mes: ${verMes.length}</span>
+      <button class="nav-arrow" onclick="PLAN.est='';renderPlan()">Ver todas ✕</button></div>` : ''}
+    <div class="area-chips">${porArea.map(({ar, L})=>`<span class="area-chip"><span class="area-dot" style="background:${AREA_COLORS[ar]||'#6b7280'}"></span>${esc(ar)} · ${L.filter(a=>a.estado==='Completado').length}/${L.length}</span>`).join('')}</div>
+    ${semanas.map(l=>{
+      const v = masDias(l, 4), todas = delMes.filter(a=>a.dia>=l && a.dia<=masDias(l, 6));
+      const L = verMes.filter(a=>a.dia>=l && a.dia<=masDias(l, 6)).sort((a,b)=>a.dia.localeCompare(b.dia) || ordenTareas(a,b));
+      if(!L.length) return '';
+      // El avance de la semana es sobre todas sus tareas, aunque la lista muestre solo las filtradas.
+      const h = todas.filter(a=>a.estado==='Completado').length, p = Math.round(h/todas.length*100);
+      const fest = [0,1,2,3,4].map(i=>masDias(l,i)).filter(d=>FESTIVOS[d]).map(d=>`${diaCorto(d)} festivo`).join(', ');
+      return `<div class="week-card">
+        <div class="week-card-head" onclick="PLAN.vista='semana';PLAN.ref='${l}';renderPlan()" title="Ver la semana día a día">
+          <div><div class="week-card-title">Semana del ${parseISO(l).getDate()} al ${parseISO(v).getDate()} de ${MESES[parseISO(v).getMonth()]} ›</div>
+            <div class="task-meta">${todas.length} tareas · ${h} hechas${E?` · ${L.length} ${E.txt}`:''}${fest?' · '+fest:''}</div></div>
+          <div style="width:120px"><div class="prog-bar"><div class="prog-fill ${p===100?'full':''}" style="width:${p}%"></div></div></div>
+        </div>
+        ${L.map(a=>`<div class="week-row ${a.estado==='Completado'?'done':''} ${vencida(a)?'vencida':''}">
+          <span class="when">${diaCorto(a.dia)}</span>
+          <div class="act-check ${a.estado==='Completado'?'done':''}" style="width:16px;height:16px" onclick="toggle(${a.id})"></div>
+          <span class="what"><span class="area-dot" style="display:inline-block;margin-right:6px;background:${AREA_COLORS[a.area]||'#6b7280'}"></span>${esc(a.desc)}${a.estado==='En proceso'?' <span class="badge badge-proceso" style="margin:0">⚡ En proceso</span>':''}</span>
+          <span class="who task-meta" style="margin:0">${esc(a.con||'')}</span>
+        </div>`).join('')}
+      </div>`;
+    }).join('') || `<div class="empty">${E ? `No hay tareas ${E.txt} este mes.` : 'No hay tareas programadas este mes.'}</div>`}` + sinProgramar;
+}
 
 function renderPend() {
   const pend = acts.filter(a=>a.estado!=='Completado');
@@ -1107,18 +1663,18 @@ function setF(a) { filterArea=a; renderActs(); }
 function toggle(id) {
   const a=acts.find(x=>x.id===id); if(!a)return;
   a.estado = a.estado==='Completado'?'Pendiente':'Completado';
-  if(a.estado==='Completado'){ a.prioridad=''; toast('✅ Marcado como completado'); }
-  save();
-  const active = document.querySelector('.page.active').id;
-  if(active==='page-actividades') renderActs();
-  if(active==='page-pendientes') renderPend();
-  if(active==='page-dashboard') renderDash();
+  // La prioridad se guarda aparte para devolverla si se desmarca.
+  if(a.estado==='Completado'){ a.priAnterior = a.prioridad; a.prioridad=''; toast('✅ Marcado como completado'); }
+  else if(a.priAnterior){ a.prioridad = a.priAnterior; }
+  save(); rerender();
 }
 
 function del(id) {
+  const a = acts.find(x=>x.id===id);
+  if(a && !esMia(a)) { toast(`Solo ${a.duena} puede eliminarla`); return; }
   if(!confirm('¿Eliminar esta actividad?')) return;
   acts = acts.filter(a=>a.id!==id);
-  save(); renderActs(); toast('Actividad eliminada');
+  save(); rerender(); toast('Actividad eliminada');
 }
 
 function addAct() {
@@ -1126,21 +1682,25 @@ function addAct() {
   if(!desc){ alert('Escribe la descripción de la actividad.'); return; }
   const est = document.getElementById('f-est').value;
   acts.push({
-    id: nextId++,
+    id: nuevoId(),
     area: document.getElementById('f-area').value,
     fecha: document.getElementById('f-fecha').value || new Date().toISOString().slice(0,10),
     desc,
     resultado: document.getElementById('f-res').value.trim(),
     estado: est,
     prioridad: est==='Pendiente' ? document.getElementById('f-pri').value : '',
-    herramienta: document.getElementById('f-her').value.trim()
+    herramienta: document.getElementById('f-her').value.trim(),
+    dia: document.getElementById('f-dia').value || '',
+    con: normalizarCon(document.getElementById('f-con').value.trim()),
+    ...(REMOTO ? { duena: YO, compartida: document.getElementById('f-comp').checked ? 'SI' : 'NO' } : {})
   });
+  const conDia = !!document.getElementById('f-dia').value;
   save(); clearForm(); toast('✅ Actividad guardada');
-  goTo('actividades');
+  goTo(conDia ? 'plan' : 'actividades');
 }
 
 function clearForm() {
-  ['f-desc','f-res','f-her'].forEach(id=>document.getElementById(id).value='');
+  ['f-desc','f-res','f-her','f-dia','f-con'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-fecha').value = new Date().toISOString().slice(0,10);
   document.getElementById('f-est').value = 'Pendiente';
 }
@@ -1205,8 +1765,18 @@ function openEdit(id) {
   document.getElementById('e-est').value = a.estado;
   document.getElementById('e-pri').value = a.prioridad||'Normal';
   document.getElementById('e-her').value = a.herramienta||'';
+  document.getElementById('e-dia').value = a.dia||'';
+  document.getElementById('e-con').value = a.con||'';
+  // "En conjunto" solo lo cambia la dueña.
+  const ec = document.getElementById('e-comp');
+  ec.checked = a.compartida==='SI'; ec.disabled = !esMia(a);
+  document.getElementById('e-comp-txt').textContent = esMia(a) ? textoConjunto() : `Actividad de ${a.duena}${a.compartida==='SI'?', en conjunto':''}: solo ella cambia esto`;
   document.getElementById('edit-modal').classList.add('open');
 }
+const textoConjunto = () => {
+  const otras = USUARIOS.filter(u=>u!==YO);
+  return `En conjunto: la ve${otras.length ? ' también ' + otras.join(', ') : 'n las demás'}`;
+};
 function closeModal(e) { if(e.target===document.getElementById('edit-modal')) closeModalDirect(); }
 function closeModalDirect() { document.getElementById('edit-modal').classList.remove('open'); }
 function saveEdit() {
@@ -1219,22 +1789,43 @@ function saveEdit() {
   a.estado = document.getElementById('e-est').value;
   a.prioridad = a.estado==='Pendiente' ? document.getElementById('e-pri').value : '';
   a.herramienta = document.getElementById('e-her').value.trim();
+  a.dia = document.getElementById('e-dia').value || '';
+  a.con = normalizarCon(document.getElementById('e-con').value.trim());
+  if(REMOTO && esMia(a)) a.compartida = document.getElementById('e-comp').checked ? 'SI' : 'NO';
   save(); closeModalDirect(); toast('✅ Actividad actualizada');
-  const active = document.querySelector('.page.active').id;
-  if(active==='page-actividades') renderActs();
-  if(active==='page-pendientes') renderPend();
-  if(active==='page-dashboard') renderDash();
+  rerender();
 }
 
 // INIT
-load();
-document.getElementById('f-fecha').value = new Date().toISOString().slice(0,10);
+document.getElementById('f-fecha').value = hoyISO();
 // Fix nav active state
 document.querySelectorAll('.nav-btn').forEach((b,i)=>{
-  const tabs=['dashboard','actividades','pendientes','agregar','informe'];
   b.addEventListener('click',()=>{ document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); });
 });
-renderDash();
+// Las casillas "En conjunto" solo existen con la hoja compartida.
+document.querySelectorAll('.solo-remoto').forEach(el=>{ el.style.display = REMOTO ? '' : 'none'; });
+function arrancar() {
+  updateAreaSelects();
+  const fc = document.getElementById('f-comp-txt'); if(fc) fc.textContent = textoConjunto();
+  // Con #plan, #actividades… en el enlace abre directo esa página (#plan-mes = plan en vista mensual).
+  const h = location.hash.slice(1);
+  if(h==='plan-mes') { PLAN.vista = 'mes'; goTo('plan'); }
+  else if(['plan','actividades','pendientes','agregar','informe'].includes(h)) goTo(h);
+  else goTo('dashboard');
+}
+if(REMOTO) {
+  pintarSesion();
+  if(SES) {
+    estadoSync('Cargando…');
+    api({ accion: 'listar' }).then(r=>{ recibir(r); arrancar(); })
+      .catch(e=>mostrarLogin(/PIN|nombre/i.test(e.message) ? e.message : 'No se pudo conectar con la hoja: ' + e.message));
+  } else mostrarLogin();
+  setInterval(refrescar, 60000);
+  window.addEventListener('focus', refrescar);
+} else {
+  load();
+  arrancar();
+}
 </script>
 </body>
 </html>
