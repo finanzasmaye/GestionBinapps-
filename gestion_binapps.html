@@ -1121,8 +1121,8 @@ function save() {
 //   - lo "en conjunto", en plan-conjunto.json, un archivo del OneDrive de quien lo crea, compartido con la otra.
 // Sin clientId todo sigue como antes, en el navegador. Instalación: microsoft/LEEME.md.
 const MS = {
-  clientId: '',     // Id. de aplicación (cliente) del registro "Panel Gestión Binapps" en Microsoft Entra
-  tenantId: '',     // Id. de directorio (inquilino) de Binapps
+  clientId: '067eeaa0-3b42-41f6-bf33-2b640aa4ca4a',   // Id. de aplicación (cliente) del registro "Panel Gestión Binapps" en Microsoft Entra
+  tenantId: 'ce706d1c-0b48-4f74-8e54-705ce62c4c51',   // Id. de directorio (inquilino) de Binapps
   conjunto: '',     // archivo del plan conjunto, "driveId!itemId": lo muestra el panel al crearlo
   companera: 'Luisa Villa',   // con quién se comparte el plan conjunto
 };
@@ -1301,7 +1301,8 @@ async function crearConjunto() {
 // Las actividades que ya estaban en este navegador (antes de conectar OneDrive) se suben una vez; las
 // pendientes con la compañera (p. ej. Luisa Villa) quedan en conjunto.
 function localesSinSubir() {
-  if(!REMOTO || !CUENTA || acts.some(a=>a.duena===YO)) return [];
+  // Se espera a que exista el plan conjunto: así lo que es con la compañera sube ya en conjunto.
+  if(!REMOTO || !CUENTA || !MS.conjunto || acts.some(a=>a.duena===YO)) return [];
   try { const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); return (d && d.acts) || []; } catch(e) { return []; }
 }
 function subirLocales() {
