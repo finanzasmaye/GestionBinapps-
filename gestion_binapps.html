@@ -583,6 +583,7 @@
           <div class="page-sub" id="dash-fecha"></div>
         </div>
       </div>
+      <div id="dash-conjunto"></div>
       <div id="dash-migrar"></div>
       <div class="kpi-grid" id="kpi-grid"></div>
       <div class="two-col">
@@ -812,18 +813,13 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- ENTRADA (solo con la hoja compartida) -->
+<!-- ENTRADA (solo con OneDrive conectado) -->
 <div class="modal-overlay" id="login-overlay">
-  <div class="modal" style="width:min(380px,92vw)">
-    <div class="modal-header"><div class="modal-title">Entrar al plan compartido</div></div>
-    <div class="form-grid full">
-      <div class="form-group"><label>Tu nombre</label><input type="text" id="login-nombre" autocomplete="username"></div>
-    </div>
-    <div class="form-grid full">
-      <div class="form-group"><label>PIN</label><input type="password" id="login-pin" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()"></div>
-    </div>
+  <div class="modal" style="width:min(400px,92vw)">
+    <div class="modal-header"><div class="modal-title">Plan de trabajo Binapps</div></div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Entra con tu cuenta de Microsoft de Binapps (la del correo). Tus actividades personales se guardan en tu OneDrive; las que están en conjunto, en el plan compartido.</p>
     <div id="login-err" style="font-size:12.5px;color:var(--red);min-height:18px;margin-bottom:10px"></div>
-    <button class="btn btn-primary" onclick="entrar()">Entrar</button>
+    <button class="btn btn-primary" onclick="entrar()">Entrar con Microsoft</button>
   </div>
 </div>
 
@@ -1118,16 +1114,26 @@ function save() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify({acts, nextId, planVer})); } catch(e){}
 }
 
-// ── COMPARTIDO (Google Sheets) ───────────────────────────────────────────────
-// Con API_URL el panel guarda en la hoja de Google (ver google-sheets/LEEME.md) y no en este navegador:
-// cada persona entra con nombre + PIN y ve lo suyo + lo marcado "en conjunto" (lo filtra la hoja, no el
-// navegador). Sin API_URL todo sigue como antes, en el navegador.
-const API_URL = '';   // ← pegar aquí la URL de la aplicación web de Apps Script (termina en /exec)
-const REMOTO = !!API_URL;
-const SES_KEY = 'gb_sesion';
+// ── COMPARTIDO (Microsoft 365) ───────────────────────────────────────────────
+// Con MS.clientId y MS.tenantId cada persona entra con su cuenta de Microsoft de Binapps y el panel guarda en
+// OneDrive, no en este navegador:
+//   - lo personal, en un archivo del OneDrive de cada una (carpeta Aplicaciones): la otra no puede abrirlo;
+//   - lo "en conjunto", en plan-conjunto.json, un archivo del OneDrive de quien lo crea, compartido con la otra.
+// Sin clientId todo sigue como antes, en el navegador. Instalación: microsoft/LEEME.md.
+const MS = {
+  clientId: '',     // Id. de aplicación (cliente) del registro "Panel Gestión Binapps" en Microsoft Entra
+  tenantId: '',     // Id. de directorio (inquilino) de Binapps
+  conjunto: '',     // archivo del plan conjunto, "driveId!itemId": lo muestra el panel al crearlo
+  companera: 'Luisa Villa',   // con quién se comparte el plan conjunto
+};
+const REMOTO = !!(MS.clientId && MS.tenantId);
+const SCOPES = ['User.Read', 'Files.ReadWrite.All'];
+const RUTA_P = '/me/drive/special/approot:/plan-personal.json';
+// "driveId!itemId": el driveId de OneDrive empresarial ya trae un "!" ("b!…"), por eso se parte en el último.
+const RUTA_C = () => { const k = MS.conjunto.lastIndexOf('!'); return `/drives/${MS.conjunto.slice(0, k)}/items/${MS.conjunto.slice(k + 1)}`; };
 const CAMPOS_HOJA = ['area','fecha','desc','resultado','estado','prioridad','priAnterior','herramienta','dia','con','compartida'];
-let SES = null, YO = '', USUARIOS = [], SNAP = new Map(), guardando = null, otraVez = false;
-try { SES = JSON.parse(localStorage.getItem(SES_KEY) || 'null'); } catch(e) {}
+let msalApp = null, CUENTA = null, YO = '', USUARIOS = [], SNAP = new Map(), guardando = null, otraVez = false;
+let PERSONAL = [], CONJ = [], ETAG = { p: null, c: null };   // última copia leída de cada archivo y su versión
 
 const firma = a => JSON.stringify(CAMPOS_HOJA.map(k=>a[k] ?? ''));
 const nuevoId = () => REMOTO ? Date.now()*10 + Math.floor(Math.random()*10) : nextId++;
@@ -1135,13 +1141,72 @@ const esMia = a => !REMOTO || !a.duena || a.duena===YO;
 const enConjunto = a => REMOTO && a.compartida==='SI';
 const etiquetaDuena = a => !REMOTO ? '' : [enConjunto(a) ? '🤝 en conjunto' : '', !esMia(a) ? `📌 de ${esc(a.duena)}` : ''].filter(Boolean).join(' · ');
 
+async function token() {
+  try { return (await msalApp.acquireTokenSilent({ scopes: SCOPES, account: CUENTA })).accessToken; }
+  catch(e) { await msalApp.acquireTokenRedirect({ scopes: SCOPES, account: CUENTA }); throw new Error('Volviendo a entrar con Microsoft…'); }
+}
+async function graph(ruta, opt = {}) {
+  const r = await fetch('https://graph.microsoft.com/v1.0' + ruta, { ...opt, headers: { Authorization: 'Bearer ' + await token(), ...(opt.headers || {}) } });
+  if(r.status===404) return null;
+  if(!r.ok) { const e = new Error(`Microsoft respondió ${r.status}: ${(await r.text()).slice(0, 180)}`); e.status = r.status; throw e; }
+  return r;
+}
+async function leerArchivo(ruta) {
+  const r = await graph(ruta);
+  if(!r) return { datos: [], etag: null };          // aún no existe (el personal se crea al guardar)
+  const m = await r.json();
+  const txt = await (await fetch(m['@microsoft.graph.downloadUrl'])).text();
+  return { datos: txt.trim() ? JSON.parse(txt) : [], etag: m.eTag };
+}
+async function escribirArchivo(ruta, datos, etag) {
+  // If-Match: si la otra persona guardó entre la lectura y esta escritura, Microsoft responde 412 y se reintenta.
+  const r = await graph(ruta + (ruta.includes(':/') || ruta.endsWith('.json') ? ':/content' : '/content'), { method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...(etag ? { 'If-Match': etag } : {}) }, body: JSON.stringify(datos) });
+  return (await r.json()).eTag;
+}
+async function leerTodo() {
+  const p = await leerArchivo(RUTA_P), c = MS.conjunto ? await leerArchivo(RUTA_C()) : { datos: [], etag: null };
+  PERSONAL = p.datos; CONJ = c.datos; ETAG = { p: p.etag, c: c.etag };
+}
+// Aplica los cambios del navegador sobre la última copia de los dos archivos. Una actividad va al archivo
+// conjunto si está "en conjunto"; solo su dueña la cambia de archivo o la borra.
+function aplicar(P, C, cambios, borrar) {
+  P = P.map(x=>({ ...x })); C = C.map(x=>({ ...x }));
+  const ahora = new Date().toISOString();
+  cambios.forEach(c=>{
+    const id = String(c.id);
+    const prev = P.find(x=>String(x.id)===id) || C.find(x=>String(x.id)===id) || null;
+    const duena = prev && prev.duena ? prev.duena : YO;
+    const enC = !!C.find(x=>String(x.id)===id);
+    const conj = !!MS.conjunto && (duena===YO ? c.compartida==='SI' : enC);
+    const nuevo = { ...(prev || {}), ...c, id, duena, compartida: conj ? 'SI' : 'NO', actualizado: ahora, actualizadoPor: YO };
+    P = P.filter(x=>String(x.id)!==id); C = C.filter(x=>String(x.id)!==id);
+    (conj ? C : P).push(nuevo);
+  });
+  const fuera = new Set(borrar.map(String));
+  P = P.filter(x=>!fuera.has(String(x.id)));
+  C = C.filter(x=>!(fuera.has(String(x.id)) && (x.duena||YO)===YO));
+  return [P, C];
+}
 async function api(cuerpo) {
-  // text/plain evita la consulta previa (CORS) que Apps Script no responde.
-  const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ ...cuerpo, usuario: SES && SES.usuario, pin: SES && SES.pin }) });
-  const j = await r.json();
-  if(!j.ok) throw new Error(j.error || 'Error de la hoja');
-  return j;
+  if(cuerpo.accion==='guardar') {
+    for(let intento = 0; intento < 4; intento++) {
+      const [P, C] = aplicar(PERSONAL, CONJ, cuerpo.cambios || [], cuerpo.borrar || []);
+      try {
+        if(JSON.stringify(P)!==JSON.stringify(PERSONAL)) { ETAG.p = await escribirArchivo(RUTA_P, P, ETAG.p); PERSONAL = P; }
+        if(MS.conjunto && JSON.stringify(C)!==JSON.stringify(CONJ)) { ETAG.c = await escribirArchivo(RUTA_C(), C, ETAG.c); CONJ = C; }
+        return { ok: true };
+      } catch(e) {
+        if(e.status!==412) throw e;
+        await leerTodo();               // la otra persona guardó justo antes: se relee y se vuelve a aplicar
+      }
+    }
+    throw new Error('el plan conjunto cambió varias veces seguidas; intenta otra vez');
+  }
+  await leerTodo();
+  return { ok: true, usuario: YO,
+    usuarios: [...new Set([YO, MS.companera, ...CONJ.map(a=>a.duena).filter(Boolean)])],
+    acts: [...PERSONAL.map(a=>({ ...a, duena: YO, compartida: 'NO' })), ...CONJ.map(a=>({ ...a, compartida: 'SI' }))] };
 }
 function recibir(r) {
   YO = r.usuario; USUARIOS = r.usuarios || [];
@@ -1165,62 +1230,86 @@ function sincronizar() {
   estadoSync('Guardando…');
   guardando = api({ accion: 'guardar', cambios, borrar })
     .then(()=>{
-      // Lo enviado ya está en la hoja. No se reemplaza la lista: si se cambió algo mientras tanto, se pierde.
+      // Lo enviado ya está en OneDrive. No se reemplaza la lista: si se cambió algo mientras tanto, se perdería.
       cambios.forEach(c=>SNAP.set(c.id, firma(c)));
       borrar.forEach(id=>SNAP.delete(id));
       estadoSync('Guardado ✓');
     })
-    .catch(e=>{ estadoSync('⚠ No se guardó', true); toast('⚠ No se guardó en la hoja: ' + e.message); })
+    .catch(e=>{ estadoSync('⚠ No se guardó', true); toast('⚠ No se guardó en OneDrive: ' + e.message); })
     .finally(()=>{ guardando = null; if(otraVez) { otraVez = false; sincronizar(); } });
 }
 // Trae lo que la otra persona haya cambiado (cada minuto y al volver a la pestaña), si no hay nada por guardar.
 async function refrescar() {
-  if(!REMOTO || !SES || guardando || hayCambios() || document.getElementById('edit-modal').classList.contains('open')) return;
+  if(!REMOTO || !CUENTA || guardando || hayCambios() || document.getElementById('edit-modal').classList.contains('open')) return;
   try { recibir(await api({ accion: 'listar' })); rerender(); estadoSync('Al día ✓'); }
-  catch(e) { estadoSync('⚠ Sin conexión con la hoja', true); }
+  catch(e) { estadoSync('⚠ Sin conexión con OneDrive', true); }
 }
 function pintarSesion() {
   const el = document.getElementById('sesion-box'); if(!el) return;
   el.style.display = REMOTO ? '' : 'none';
   if(!REMOTO) return;
-  el.innerHTML = SES && YO ? `<div style="font-size:12.5px;font-weight:500;color:var(--text)">👤 ${esc(YO)}</div>
+  el.innerHTML = CUENTA ? `<div style="font-size:12.5px;font-weight:500;color:var(--text)">👤 ${esc(YO)}</div>
     <div id="sync-estado" style="font-size:11px;color:var(--text-soft)">Al día ✓</div>
     <button class="link-btn" onclick="salir()">Salir</button>` : '';
 }
 function mostrarLogin(msg) {
   document.getElementById('login-err').textContent = msg || '';
   document.getElementById('login-overlay').classList.add('open');
-  setTimeout(()=>document.getElementById(SES && SES.usuario ? 'login-pin' : 'login-nombre').focus(), 50);
 }
-async function entrar() {
-  const usuario = document.getElementById('login-nombre').value.trim(), pin = document.getElementById('login-pin').value.trim();
-  if(!usuario || !pin) { document.getElementById('login-err').textContent = 'Escribe tu nombre y tu PIN.'; return; }
-  SES = { usuario, pin };
-  document.getElementById('login-err').textContent = 'Entrando…';
+function entrar() {
+  try { sessionStorage.setItem('gb_hash', location.hash); } catch(e) {}   // el regreso de Microsoft no trae el #
+  msalApp.loginRedirect({ scopes: SCOPES, prompt: 'select_account' });
+}
+function salir() { msalApp.logoutRedirect({ account: CUENTA }); }
+async function iniciarMS() {
+  await new Promise((ok, mal)=>{   // la librería de Microsoft se carga solo si el panel está conectado
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.30.0/lib/msal-browser.min.js';
+    s.onload = ok; s.onerror = ()=>mal(new Error('no cargó la librería de inicio de sesión de Microsoft'));
+    document.head.appendChild(s);
+  });
+  msalApp = new msal.PublicClientApplication({ auth: { clientId: MS.clientId, authority: 'https://login.microsoftonline.com/' + MS.tenantId,
+    redirectUri: location.origin + location.pathname }, cache: { cacheLocation: 'localStorage' } });
+  await msalApp.initialize();
+  const r = await msalApp.handleRedirectPromise();
+  CUENTA = (r && r.account) || msalApp.getAllAccounts()[0] || null;
+  if(!CUENTA) { mostrarLogin(); return; }
+  try { const h = sessionStorage.getItem('gb_hash'); if(h && !location.hash) history.replaceState(null, '', h); sessionStorage.removeItem('gb_hash'); } catch(e) {}
+  YO = CUENTA.name || CUENTA.username;
+  estadoSync('Cargando…');
+  recibir(await api({ accion: 'listar' }));
+  document.getElementById('login-overlay').classList.remove('open');
+  arrancar();
+}
+// El plan conjunto: un archivo en el OneDrive de quien lo crea, compartido (con permiso de edición) con la otra.
+async function crearConjunto() {
+  const correo = document.getElementById('conj-correo').value.trim();
+  if(!/@/.test(correo)) { toast('Escribe el correo de Microsoft de ' + MS.companera); return; }
+  const btn = document.getElementById('conj-btn'); btn.disabled = true; btn.textContent = 'Creando…';
   try {
-    recibir(await api({ accion: 'listar' }));
-    try { localStorage.setItem(SES_KEY, JSON.stringify(SES)); } catch(e) {}
-    document.getElementById('login-overlay').classList.remove('open');
-    arrancar();
-  } catch(e) { SES = null; document.getElementById('login-err').textContent = e.message; }
+    const r = await graph('/me/drive/root:/Plan de trabajo Binapps/plan-conjunto.json:/content?@microsoft.graph.conflictBehavior=fail',
+      { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: '[]' });
+    const m = await r.json(), ref = `${m.parentReference.driveId}!${m.id}`;
+    await graph(`/drives/${m.parentReference.driveId}/items/${m.id}/invite`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recipients: [{ email: correo }], roles: ['write'], requireSignIn: true, sendInvitation: false }) });
+    document.getElementById('dash-conjunto').innerHTML = `<div class="card" style="margin-bottom:16px;border-color:var(--green-border);background:var(--green-light)">
+      <div style="font-size:13px;margin-bottom:8px">✅ Plan conjunto creado en tu OneDrive (carpeta <b>Plan de trabajo Binapps</b>) y compartido con ${esc(correo)}.
+      Último paso: este código va en el panel (MS.conjunto). Cópialo y pásaselo a quien mantiene el panel:</div>
+      <code style="display:block;word-break:break-all;background:white;padding:8px;border-radius:6px;font-size:12px">${esc(ref)}</code></div>`;
+  } catch(e) { btn.disabled = false; btn.textContent = 'Crear plan conjunto'; toast('⚠ ' + e.message); }
 }
-function salir() {
-  try { localStorage.removeItem(SES_KEY); } catch(e) {}
-  SES = null; YO = ''; acts = []; SNAP = new Map(); pintarSesion(); rerender(); mostrarLogin();
-}
-// Las actividades que ya estaban en este navegador (antes de conectar la hoja) se suben una vez, como
-// personales de quien entra; después se marca cuáles son en conjunto.
+// Las actividades que ya estaban en este navegador (antes de conectar OneDrive) se suben una vez; las
+// pendientes con la compañera (p. ej. Luisa Villa) quedan en conjunto.
 function localesSinSubir() {
-  if(!REMOTO || acts.some(a=>a.duena===YO)) return [];
+  if(!REMOTO || !CUENTA || acts.some(a=>a.duena===YO)) return [];
   try { const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); return (d && d.acts) || []; } catch(e) { return []; }
 }
 function subirLocales() {
   const L = localesSinSubir(); if(!L.length) return;
-  // Las que dicen "con" una de las otras personas del plan (p. ej. Luisa Villa) ya suben en conjunto.
   const otras = USUARIOS.filter(u=>u!==YO);
-  const conjunta = a => a.estado!=='Completado' && otras.some(u=>partirCon(a.con).some(x=>sinTildes(x).startsWith(sinTildes(u)) || sinTildes(u).startsWith(sinTildes(x))));
+  const conjunta = a => !!MS.conjunto && a.estado!=='Completado' && otras.some(u=>partirCon(a.con).some(x=>sinTildes(x).startsWith(sinTildes(u)) || sinTildes(u).startsWith(sinTildes(x))));
   const nConj = L.filter(conjunta).length;
-  if(!confirm(`¿Subir tus ${L.length} actividades de este navegador al plan compartido?\n\n${nConj} pendientes con ${otras.join(', ') || 'otras personas'} quedan en conjunto; las demás, personales tuyas.`)) return;
+  if(!confirm(`¿Subir tus ${L.length} actividades de este navegador a tu OneDrive?\n\n${nConj} pendientes con ${otras.join(', ') || 'otras personas'} quedan en conjunto; las demás, personales tuyas.`)) return;
   const base = Date.now()*10;
   L.forEach((a, i)=>acts.push({ ...a, id: base + i, duena: YO, compartida: conjunta(a) ? 'SI' : 'NO' }));
   save(); rerender(); toast(`⬆ ${L.length} actividades subidas · ${nConj} en conjunto`);
@@ -1306,6 +1395,12 @@ function renderDash() {
       <div><div style="font-size:12.5px;line-height:1.4">${a.desc.substring(0,75)}${a.desc.length>75?'…':''}</div>
       <div style="font-size:11px;color:var(--text-soft);margin-top:3px">${a.area} · ${a.fecha}</div></div>
     </div>`).join('');
+  const dc = document.getElementById('dash-conjunto');
+  if(REMOTO && CUENTA && !MS.conjunto && !dc.innerHTML.includes('Plan conjunto creado')) dc.innerHTML = `<div class="card" style="margin-bottom:16px;border-color:var(--blue-border)">
+      <div class="sec-title">Crear el plan conjunto con ${esc(MS.companera)}</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">Se crea un archivo en tu OneDrive (carpeta “Plan de trabajo Binapps”) y se le comparte con permiso de edición. Solo se hace una vez.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="conj-correo" type="email" placeholder="correo de ${esc(MS.companera)} (@binapps…)" style="flex:1;min-width:220px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit">
+      <button class="btn btn-primary" id="conj-btn" onclick="crearConjunto()">Crear plan conjunto</button></div></div>`;
   const loc = localesSinSubir();
   document.getElementById('dash-migrar').innerHTML = loc.length ? `<div class="card" style="margin-bottom:16px;border-color:var(--blue-border);background:var(--blue-light);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
       <span style="font-size:13px">En este navegador tienes <b>${loc.length}</b> actividades de antes de conectar el plan compartido.</span>
@@ -1817,11 +1912,12 @@ function openEdit(id) {
   document.getElementById('e-con').value = a.con||'';
   // "En conjunto" solo lo cambia la dueña.
   const ec = document.getElementById('e-comp');
-  ec.checked = a.compartida==='SI'; ec.disabled = !esMia(a);
+  ec.checked = a.compartida==='SI'; ec.disabled = !esMia(a) || !MS.conjunto;
   document.getElementById('e-comp-txt').textContent = esMia(a) ? textoConjunto() : `Actividad de ${a.duena}${a.compartida==='SI'?', en conjunto':''}: solo ella cambia esto`;
   document.getElementById('edit-modal').classList.add('open');
 }
 const textoConjunto = () => {
+  if(!MS.conjunto) return 'En conjunto (primero hay que crear el plan conjunto, en Resumen)';
   const otras = USUARIOS.filter(u=>u!==YO);
   return `En conjunto: la ve${otras.length ? ' también ' + otras.join(', ') : 'n las demás'}`;
 };
@@ -1850,11 +1946,12 @@ document.getElementById('f-fecha').value = hoyISO();
 document.querySelectorAll('.nav-btn').forEach((b,i)=>{
   b.addEventListener('click',()=>{ document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); });
 });
-// Las casillas "En conjunto" solo existen con la hoja compartida.
+// Las casillas "En conjunto" solo existen con OneDrive conectado.
 document.querySelectorAll('.solo-remoto').forEach(el=>{ el.style.display = REMOTO ? '' : 'none'; });
 function arrancar() {
   updateAreaSelects();
   const fc = document.getElementById('f-comp-txt'); if(fc) fc.textContent = textoConjunto();
+  const fcc = document.getElementById('f-comp'); if(fcc) fcc.disabled = !MS.conjunto;
   // Con #plan, #actividades… en el enlace abre directo esa página (#plan-mes = plan en vista mensual).
   const h = location.hash.slice(1);
   if(h==='plan-mes' || h==='plan-area') { PLAN.vista = h.slice(5); goTo('plan'); }
@@ -1863,11 +1960,7 @@ function arrancar() {
 }
 if(REMOTO) {
   pintarSesion();
-  if(SES) {
-    estadoSync('Cargando…');
-    api({ accion: 'listar' }).then(r=>{ recibir(r); arrancar(); })
-      .catch(e=>mostrarLogin(/PIN|nombre/i.test(e.message) ? e.message : 'No se pudo conectar con la hoja: ' + e.message));
-  } else mostrarLogin();
+  iniciarMS().catch(e=>mostrarLogin('No se pudo conectar con Microsoft: ' + e.message));
   setInterval(refrescar, 60000);
   window.addEventListener('focus', refrescar);
 } else {
